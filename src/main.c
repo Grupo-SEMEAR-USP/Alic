@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void foo(int* x)
-{
-    x++;
+int foo(void){
+    int oi=8;
+    return oi;
 }
+
