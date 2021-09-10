@@ -2,7 +2,7 @@
 
 //caso seja uma build de debug (como definido no Makefile) cria esse macro
 //se nao, ignora toda a vez que ele aparecer
-#ifdef NODEBUG
+#ifndef NODEBUG
 #define PRINTD(arg) Serial.print(arg)
 #else
 #define PRINTD(arg) 
