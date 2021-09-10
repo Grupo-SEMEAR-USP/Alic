@@ -1,26 +1,59 @@
 #!/usr/bin/python3
-#módulos necessários: svg.path, turtle
+#módulos necessários: xml, svg.path, pyserial
 
 #TODO:
 # transformar as coordenadas cartesianas em polares em drawLine;
-# conexão via bluetooth com o arduino.
+# PICSend com cores
+# comunicação serial melhor (só mandar informação quando o PIC quiser)
 
 from svg.path import parse_path
 from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier
 from xml.dom import minidom
-import turtle
+import serial
+import time
 import sys
 
 
-def PICInit(w, h):
-    PIC = turtle.Turtle() #o pic :)
-    m = max(w, h)
-    PIC.screen.setworldcoordinates(0, m, m, 0)
+def PICInit(com, w, h):
+    PIC = serial.Serial(com)
     return PIC
 
 def PICEnd(PIC):
-    PIC.hideturtle()
-    PIC.screen.mainloop()
+    PIC.close()
+
+def PICSend(PIC, cmd, *args):
+    buf = bytes()
+    if cmd == "goto":
+        buf += b'g'
+        buf += int(args[0]).to_bytes(length=2, byteorder="big")
+        buf += int(args[1]).to_bytes(length=2, byteorder="big")
+    elif cmd == "line":
+        buf += b'l'
+        buf += int(args[0]).to_bytes(length=2, byteorder="big")
+        buf += int(args[1]).to_bytes(length=2, byteorder="big")
+    elif cmd == "color":
+        buf += b'c'
+        buf += b'b'
+        buf += b'\n\n\n'
+    else:
+        raise ValueError
+
+    PIC.write(buf)
+    time.sleep(0.05)
+    print(f'{cmd}: ', *args)
+
+
+def drawLine(PIC, x, y):
+    PICSend(PIC, "line", x, y)
+
+#coloca a cor correta para o pic
+def setColor(PIC, color):
+    PICSend(PIC, "color", *color)
+
+#sem desenhar no papel, vai para esse lugar
+def goTo(PIC, x, y):
+    PICSend(PIC, "goto", x, y)
+
 
 #porque o formato de svg é pouco padronizado, 
 #tem alguns arquivos que tem um sulfixo de mm ou px;
@@ -90,48 +123,29 @@ def parseSVG(filename):
     doc.unlink()
     return (w, h, paths, colors)
 
-#desenha uma linha
-def drawLine(x, y):
-    PIC.goto(x, y)
-    print(f'line: ({x}, {y})') 
-
-#coloca a cor correta para o pic
-def setColor(color):
-    PIC.color(color)
-    print(f'color: {color}')
-
-#sem desenhar no papel, vai para esse lugar
-def walkTo(x, y):
-    PIC.up()
-    PIC.goto(x, y)
-    PIC.down()
-    print(f'goto: ({x}, {y})')
 
 #desenha um caminho
-def drawPath(path, bres):
+def drawPath(PIC, path, bres):
     for e in path: #para cada elemento no caminho (curva, linha, etc)
-
         if isinstance(e, Move):
-            walkTo(e.start.real, e.start.imag)
+            goTo(PIC, e.start.real, e.start.imag)
         
         #o arco não foi implementado, por isso está aqui
-        if isinstance(e, Line) or isinstance(e, Arc):
+        elif isinstance(e, Line) or isinstance(e, Arc):
             x = e.end.real
             y = e.end.imag
-            drawLine(x, y)
+            drawLine(PIC, x, y)
 
         #para as curvas de bezier, esse t é um parâmetro real que vai de zero a um 
         #sendo que em zero ele está o início da curva e em um ele está no final
         elif isinstance(e, QuadraticBezier):
             for t in range(0, bres+1):
                 x, y = qbezier(t/bres, e.start, e.control, e.end)
-                drawLine(x, y)
-
+                drawLine(PIC, x, y)
         elif isinstance(e, CubicBezier):
             for t in range(0, bres+1):
                 x, y = cbezier(t/bres, e.start, e.control1, e.control2, e.end)
-                drawLine(x, y)
-
+                drawLine(PIC, x, y)
 
 #função cúbica usada no formato SVG, só copiei da wikipédia sobre "bezier curves"
 def cbezier(t, start, c1, c2, end):
@@ -146,21 +160,21 @@ def qbezier(t, start, c, end):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print(f"Erro! use: {sys.argv[0]} arquivo.svg detalhe_no_caminho(>=1)", file=sys.stderr)
+    if len(sys.argv) < 4:
+        print(f"Erro! use: {sys.argv[0]} COM_port arquivo.svg detalhe_no_caminho(>=1)", file=sys.stderr)
         sys.exit(-1)
 
     #le o svg
-    w, h, paths, colors = parseSVG(sys.argv[1])
+    w, h, paths, colors = parseSVG(sys.argv[2])
 
     #inicializa o PIC :)
-    PIC = PICInit(w, h)
+    PIC = PICInit(sys.argv[1], w, h)
 
     #desenha todos os caminhos do arquivo
     for path, color in zip(paths, colors):
         #coloca a cor correta
-        setColor(color)
+        setColor(PIC, color)
         #e desenha o caminho!
-        drawPath(path, int(sys.argv[2]))
+        drawPath(PIC, path, int(sys.argv[3]))
 
     PICEnd(PIC)
