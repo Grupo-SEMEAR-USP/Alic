@@ -1,8 +1,9 @@
 compile_commands.json
+venv/*
 .vscode/*
 .cache/*
+*.eep
+*.bin
 *.hex
 *.o
 *.elf
-*.exe
-
