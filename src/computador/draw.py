@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-#módulos necessários: xml, svg.path, pyserial
+#módulos necessários: xml, svg.path, pyserial, numpy
 
 #TODO:
-# transformar as coordenadas cartesianas em polares em drawLine;
-# PICSend com cores
-# comunicação serial melhor (só mandar informação quando o PIC quiser)
+# ver formas de evitar erros de posição carteziana nas linhas
+# comunicação serial melhor (ver se flush é a solução definitiva)
+# definir as cores corretas
 
 from svg.path import parse_path
 from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier
@@ -12,6 +12,15 @@ from xml.dom import minidom
 import serial
 import time
 import sys
+import numpy as np
+import math as m
+
+#cores: branco, preto, vermelho, verde, azul escuro, amarelo, roxo, azul bebê
+pic_colors = np.array([
+    [1, 1, 1], [0, 0, 0],
+    [1, 0, 0], [0, 1, 0], [0, 0, 1],
+    [1, 1, 0], [1, 0, 1], [0, 1, 1]
+])
 
 
 def PICInit(com, w, h):
@@ -33,22 +42,36 @@ def PICSend(PIC, cmd, *args):
         buf += int(args[1]).to_bytes(length=2, byteorder="big")
     elif cmd == "color":
         buf += b'c'
-        buf += b'b'
+        buf += int(args[0]).to_bytes(length=1, byteorder="big")
         buf += b'\n\n\n'
     else:
         raise ValueError
 
     PIC.write(buf)
-    time.sleep(0.05)
+    PIC.flush() #ideal?
     print(f'{cmd}: ', *args)
 
 
+#desenha uma linha
 def drawLine(PIC, x, y):
     PICSend(PIC, "line", x, y)
 
+#pega o index da cor correta para o PIC interpretar
+def getPicColor(rgb):
+    nprgb = np.array(rgb)
+    color_error = []
+    #para cada cor que o pic tem, calcula o erro (o **2 é para tirar o sinal) de cada cor e soma
+    for color in pic_colors:
+        error = ((color - nprgb)**2).sum()
+        color_error.append(error)
+
+    #e retorna a cor com menor erro +1 já que o zero é especial
+    return color_error.index(min(color_error))+1
+
 #coloca a cor correta para o pic
-def setColor(PIC, color):
-    PICSend(PIC, "color", *color)
+def setColor(PIC, rgbcolor):
+    piccolor = getPicColor(rgbcolor)
+    PICSend(PIC, "color", piccolor)
 
 #sem desenhar no papel, vai para esse lugar
 def goTo(PIC, x, y):
