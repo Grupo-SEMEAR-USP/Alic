@@ -1,14 +1,57 @@
 
 #TODO: fazer um makefile bom 
 
-all: src/arduino/arduino.ino
-	arduino-cli compile --fqbn arduino:avr:uno src/arduino/arduino.ino --build-property "build.extra_flags=\"-DNODEBUG\"" --export-binaries
 
-debug:
-	arduino-cli compile --fqbn arduino:avr:uno src/arduino/arduino.ino --export-binaries
+COM ?= /dev/ttyACM0
+
+FQBN  ?= arduino:avr:uno
+BOARD ?= arduino.avr.uno
+CPU   ?= atmega328p
+
+
+BUILDD      ?= ./inobuild
+INO_BUILDD  ?= $(BUILDD)/build
+
+SRC          = ./src
+ARDUINO_SRC  = $(SRC)/arduino
+INO_FILES    = $(wildcard $(ARDUINO_SRC)/*.ino $(ARDUINO_SRC)/*.cpp $(ARDUINO_SRC)/*.c)
+
+RES         ?= ./res
+
+PY_SRC       = $(SRC)/computador
+PY_TEST_SRC  = $(PY_SRC)/draw.py
+PY_TEST_SVG  = $(RES)/Logo\ NRE.svg
+EXTRA_FLAGS ?= \"-Wall\" \"-Wextra\"
+
+
+OUT_FILE = arduino.ino.with_bootloader.hex
+HEX_FILE = $(INO_BUILDD)/$(BOARD)/$(OUT_FILE)
+
+
+
+.PHONY: all clean ino debug flash pytest
+
+all: ino
+
+clean:
+	@rm -rf $(BUILDD)
+
+
+ino: EXTRA_FLAGS+=\"-DNODEBUG\"
+ino: $(HEX_FILE)
+
+debug: $(HEX_FILE)
+
 
 flash:
-	cd src/arduino/build/arduino.avr.uno/ && sudo avrdude -p atmega328p -c arduino -U flash:w:arduino.ino.with_bootloader.hex:i -F -P /dev/ttyACM0
+	cd $(INO_BUILDD)/$(BOARD)/ && sudo avrdude -p $(CPU) -c arduino -U flash:w:$(OUT_FILE):i -F -P $(COM)
 
-py:
-	python ./src/computador/draw.py /dev/ttyACM0 res/Logo\ NRE.svg 3
+pytest:
+	python $(PY_TEST_SRC) $(COM) $(PY_TEST_SVG) 3
+
+
+$(HEX_FILE): $(INO_FILES)
+	arduino-cli compile --fqbn $(FQBN) $(INO_FILES) --build-property "build.extra_flags=$(EXTRA_FLAGS)" --export-binaries
+	@mkdir $(BUILDD) 2>/dev/null | true
+	@rm -rf $(BUILDD)/build
+	@mv -fu $(ARDUINO_SRC)/build $(BUILDD)
