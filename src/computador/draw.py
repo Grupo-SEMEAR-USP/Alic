@@ -9,6 +9,7 @@
 from svg.path import parse_path
 from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier
 from xml.dom import minidom
+import struct
 import serial
 import time
 import sys
@@ -17,7 +18,7 @@ import math as m
 
 #cores: branco, preto, vermelho, verde, azul escuro, amarelo, roxo, azul bebê
 pic_colors = np.array([
-    [1, 1, 1], [0, 0, 0],
+    [0.8, 0.8, 0.8], [0, 0, 0],
     [1, 0, 0], [0, 1, 0], [0, 0, 1],
     [1, 1, 0], [1, 0, 1], [0, 1, 1]
 ])
@@ -34,12 +35,10 @@ def PICSend(PIC, cmd, *args):
     buf = bytes()
     if cmd == "goto":
         buf += b'g'
-        buf += int(args[0]).to_bytes(length=2, byteorder="big")
-        buf += int(args[1]).to_bytes(length=2, byteorder="big")
+        buf += bytearray(struct.pack("HH", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "line":
         buf += b'l'
-        buf += int(args[0]).to_bytes(length=2, byteorder="big")
-        buf += int(args[1]).to_bytes(length=2, byteorder="big")
+        buf += bytearray(struct.pack("HH", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "color":
         buf += b'c'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
