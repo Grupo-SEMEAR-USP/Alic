@@ -19,7 +19,8 @@ INO_FILES    = $(wildcard $(ARDUINO_SRC)/*.ino $(ARDUINO_SRC)/*.cpp $(ARDUINO_SR
 RES         ?= ./res
 
 PY_SRC       = $(SRC)/computador
-PY_TEST_SRC  = $(PY_SRC)/draw.py
+PY_DRAW_NAME  = draw.py
+PY_TR_NAME    = turtletest.py
 PY_TEST_SVG  = $(RES)/Logo\ NRE.svg
 EXTRA_FLAGS ?= \"-Wall\" \"-Wextra\"
 
@@ -47,7 +48,10 @@ flash:
 	cd $(INO_BUILDD)/$(BOARD)/ && sudo avrdude -p $(CPU) -c arduino -U flash:w:$(OUT_FILE):i -F -P $(COM)
 
 pytest:
-	python $(PY_TEST_SRC) $(COM) $(PY_TEST_SVG) 3
+	cd $(PY_SRC) && python $(PY_DRAW_NAME) $(COM) $(PWD)/$(PY_TEST_SVG) 10
+
+pyturtle:
+	cd $(PY_SRC) && python $(PY_TR_NAME) $(COM) $(PWD)/$(PY_TEST_SVG) 10
 
 
 $(HEX_FILE): $(INO_FILES)

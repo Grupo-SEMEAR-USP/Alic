@@ -7,3 +7,4 @@ venv/*
 *.hex
 *.o
 *.elf
+*.pyc
