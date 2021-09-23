@@ -3,8 +3,6 @@
 
 #TODO:
 # ver formas de evitar erros de posição carteziana nas linhas
-# comunicação serial melhor (ver se flush é a solução definitiva)
-# definir as cores corretas
 
 from svg.path import parse_path
 from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier
@@ -54,9 +52,12 @@ def PICSend(PIC, cmd, *args):
     else:
         raise ValueError
 
+    #o primeiro comando escreve incondicionalmente, depois vê quando pode mandar o próximo
     PIC.write(buf)
-    PIC.flush() #ideal?
     print(f'{cmd}: ', *args)
+    flag_byte = PIC.read(size=1)
+    if flag_byte[0] != ord('2'):
+        raise IOError(f"Received a strange command \'{flag_byte}\'")
 
 
 #desenha uma linha

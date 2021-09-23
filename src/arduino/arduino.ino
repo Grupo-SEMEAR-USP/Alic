@@ -18,6 +18,7 @@
 #define MEC_PIN 10
 
 
+#define PROXIMO_COMANDO '2'
 #define INBUFS 5
 
 SoftwareSerial pc_blue(BT_RX, BT_TX);
@@ -74,8 +75,8 @@ void change_color(int newcolor){
     break;
 
     default:
-        Serial.println("ERRO!");
-        pc_blue.println("ERRO!");
+        Serial.println("SEM COR!");
+        pc_blue.println("SEM COR!");
         break;
   }
 }
@@ -129,10 +130,11 @@ void read_bt(void){
         change_color(inbuf[1]);
         break;
     default:
-        Serial.println("ERRO!");
-        pc_blue.println("ERRO!");
+        Serial.println("NAO TEM COMANDO!");
+        pc_blue.println("NAO TEM COMANDO!");
         break;
     }
+    pc_blue.write(PROXIMO_COMANDO);
 }
 
 
