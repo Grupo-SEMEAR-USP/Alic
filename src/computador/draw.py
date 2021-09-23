@@ -31,6 +31,14 @@ def PICInit(com, w, h):
 def PICEnd(PIC):
     PIC.close()
 
+
+#função que manda as informações para o pic
+#formatação da informação:
+#um byte de metadata, contendo o comando (linha, ir para e cor)
+#quatro bytes de informação, sendo, na cor, um para index e três de padding
+#e, na linha e ir para um conjunto de dois unsigned shorts de
+#coordenas multiplicados por cinquenta 
+#(permite imagens de até +-1000x1000px com uma precisão boa e apenas 5 bytes de envio)
 def PICSend(PIC, cmd, *args):
     buf = bytes()
     if cmd == "goto":

@@ -1,7 +1,4 @@
 
-#TODO: fazer um makefile bom 
-
-
 COM ?= /dev/ttyACM0
 
 FQBN  ?= arduino:avr:uno

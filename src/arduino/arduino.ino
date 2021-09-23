@@ -1,12 +1,6 @@
 #include <Servo.h>
 #include <SoftwareSerial.h>
 
-/*defines de pins*/
-#define BT_RX 2
-#define BT_TX 3
-#define TAMBOR_PIN 9
-#define MEC_PIN 10
-
 
 //caso seja uma build de debug (como definido no Makefile) cria esse macro
 //se nao, ignora toda a vez que ele aparecer
@@ -15,6 +9,14 @@
 #else
 #define PRINTD(arg) 
 #endif
+
+
+/*defines de pins*/
+#define BT_RX 2
+#define BT_TX 3
+#define TAMBOR_PIN 9
+#define MEC_PIN 10
+
 
 #define INBUFS 5
 
