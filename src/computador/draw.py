@@ -41,10 +41,10 @@ def PICSend(PIC, cmd, *args):
     buf = bytes()
     if cmd == "goto":
         buf += b'g'
-        buf += bytearray(struct.pack("HH", int(args[0]*50), int(args[1]*50))) 
+        buf += bytearray(struct.pack(">HH", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "line":
         buf += b'l'
-        buf += bytearray(struct.pack("HH", int(args[0]*50), int(args[1]*50))) 
+        buf += bytearray(struct.pack(">HH", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "color":
         buf += b'c'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")

@@ -24,7 +24,7 @@
 SoftwareSerial pc_blue(BT_RX, BT_TX);
 Servo tambor;
 Servo mec;
-int inbuf[INBUFS]; //buffer de entrada, guarda os inputs de bluetooth
+unsigned int inbuf[INBUFS]; //buffer de entrada, guarda os inputs de bluetooth
 int rbyte = 0; //a posicao no buffer que temos que ler ainda
 
 
@@ -119,12 +119,12 @@ void read_bt(void){
     case 'g':
         x = (inbuf[1] << 8) + inbuf[2];
         y = (inbuf[3] << 8) + inbuf[4];
-        goto_pos(x, y);
+        goto_pos(x/50, y/50);
         break;
     case 'l':
         x = (inbuf[1] << 8) + inbuf[2];
         y = (inbuf[3] << 8) + inbuf[4];
-        draw_line(x, y);
+        draw_line(x/50, y/50);
         break;
     case 'c':
         change_color(inbuf[1]);
