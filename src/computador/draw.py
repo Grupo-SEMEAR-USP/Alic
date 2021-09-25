@@ -5,7 +5,7 @@
 # ver formas de evitar erros de posição carteziana nas linhas
 
 from svg.path import parse_path
-from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier
+from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier, Close
 from xml.dom import minidom
 import struct
 import serial
@@ -98,9 +98,14 @@ def strToFloatForce(s):
 
 #converte um hexadecimal de 6 caracteres em um conjunto de rgb de zero a um
 def rgbfromhex(s):
-    r = int(s[0:2], 16)/255
-    g = int(s[2:4], 16)/255
-    b = int(s[4:6], 16)/255
+    print(s)
+    try:
+        r = int(s[0:2], 16)/255
+        g = int(s[2:4], 16)/255
+        b = int(s[4:6], 16)/255
+    except ValueError: #ignora se a cor for "green" e não 00ff00
+        print("aaaa")
+        r, g, b = 0, 0, 0
     return (r, g, b)
 
 #pega o arquivo de svg e retorna o tamanho, caminhos e cores dele
@@ -125,26 +130,23 @@ def parseSVG(filename):
         #existem outras tags além de path, mas até agora só foi implementado ele
         path_str = path_xml.getAttribute('d')
 
-        #pega a cor
-        style = path_xml.getAttribute('style')
+        #pega a cor do stroke ou usa fill como falback 
         stroke = path_xml.getAttribute('stroke')
         fill = path_xml.getAttribute('fill')
+        style = path_xml.getAttribute('style')
+        style_stroke_i = style.find("stroke:#")
+        style_fill_i = style.find("fill:#")
         
         if stroke != "":
             r, g, b = rgbfromhex(stroke[1:])
+        elif style_stroke_i != -1:
+            style_stroke_i += len("stroke:#")
+            r, g, b = rgbfromhex(style[style_stroke_i:style_stroke_i+6])
         elif fill != "":
             r, g, b = rgbfromhex(fill[1:])
-        elif style != "":
-            colori = style.find("stroke:#")
-            if colori == -1:
-                #usa o fill como fallback pra não ficar sem cor tão facilmente
-                colori = style.find("fill:#")
-
-            if colori != -1:
-                colori = style.find("#", colori) + 1
-                r, g, b = rgbfromhex(style[colori:colori+6])
-            else:
-                r, g, b = 0, 0, 0
+        elif style_fill_i != -1:
+            style_fill_i += len("fill:#")
+            r, g, b = rgbfromhex(style[style_fill_i:style_fill_i+6])
         else:
             r, g, b = 0, 0, 0
 
@@ -156,43 +158,29 @@ def parseSVG(filename):
 
 
 #desenha um caminho
-def drawPath(PIC, path, bres):
+def drawPath(PIC, path, detail):
     for e in path: #para cada elemento no caminho (curva, linha, etc)
         if isinstance(e, Move):
             goTo(PIC, e.start.real, e.start.imag)
-        
-        #o arco não foi implementado, por isso está aqui
-        elif isinstance(e, Line) or isinstance(e, Arc):
+        elif isinstance(e, Line) or isinstance(e, Close):
             x = e.end.real
             y = e.end.imag
             drawLine(PIC, x, y)
-
-        #para as curvas de bezier, esse t é um parâmetro real que vai de zero a um 
-        #sendo que em zero ele está o início da curva e em um ele está no final
-        elif isinstance(e, QuadraticBezier):
-            for t in range(0, bres+1):
-                x, y = qbezier(t/bres, e.start, e.control, e.end)
+        #o módulo svg.path tem a útil função que pega um parâmetro t de zero a um e
+        #retorna um ponto na curva, sendo que em t=0 é o início da curva e t=1 é o final
+        #e aparentemente ele é implementado para quase todas as classes de path
+        else:
+            for t in range(0, detail+1):
+                p = e.point(t/detail)
+                x, y = p.real, p.imag
                 drawLine(PIC, x, y)
-        elif isinstance(e, CubicBezier):
-            for t in range(0, bres+1):
-                x, y = cbezier(t/bres, e.start, e.control1, e.control2, e.end)
-                drawLine(PIC, x, y)
-
-#função cúbica usada no formato SVG, só copiei da wikipédia sobre "bezier curves"
-def cbezier(t, start, c1, c2, end):
-    z = (1-t)**3*start + 3*(1-t)**2*t*c1 + 3*(1-t)*t**2*c2 + t**3*end
-    return (z.real, z.imag)
-
-#mesma coisa só para a quadrática
-def qbezier(t, start, c, end):
-    z = (1-t)**2*start + 2*(1-t)*t*c + t**2*end
-    return (z.real, z.imag)
-
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print(f"Erro! use: {sys.argv[0]} COM_port arquivo.svg detalhe_no_caminho(>=1)", file=sys.stderr)
+        print(
+        f"Erro! use: {sys.argv[0]} COM_port arquivo.svg detalhe_no_caminho(>=1)", 
+        file=sys.stderr)
         sys.exit(-1)
 
     #le o svg
