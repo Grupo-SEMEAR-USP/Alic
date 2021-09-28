@@ -88,7 +88,7 @@ void control()
 {
     //Alteracao nas velocidades
     int left_speed = initial_speed + output;
-    int right_speed = initial_speed - output;
+    int right_speed = initial_speed + output;
 
     //Restringindo a velocidade
     constrain(left_speed, 0, 255);
