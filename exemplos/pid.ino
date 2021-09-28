@@ -1,107 +1,123 @@
 // C++ code
 //
-long readUltrasonicDistance(int triggerPin, int echoPin)
-{
-    pinMode(triggerPin, OUTPUT); // Clear the trigger
-    digitalWrite(triggerPin, LOW);
-    delayMicroseconds(2);
-    // Sets the trigger pin to HIGH state for 10 microseconds
-    digitalWrite(triggerPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(triggerPin, LOW);
-    pinMode(echoPin, INPUT);
-    // Reads the echo pin, and returns the sound wave travel time in microseconds
-    return pulseIn(echoPin, HIGH);
-}
+#include <Ultrasonic.h> //Biblioteca para o sensor ultrassonico
+
+//Variaveis do pid
+unsigned long last_time = 0;
+double input = 0, output = 0, setpoint = 0;             //Valor do sensor, resultado e valor ideal
+double err_sum = 0, last_err = 0, error = 0, d_err = 0; //Erros
+double kp = 0, ki = 0, kd = 0;                          //Constantes que devem ser calibradas - proporcional, integral e derivativa
+
+//Variaveis dos sensores
+//Ultrassonico
+float distance = 0;
+long microsec = 0;
+
+//Variaveis dos motores
+int initial_speed = 100;
+
+//Funcoes
+void pid();
+void ultra_read();
+int infra_read();
+void control();
 
 void setup()
 {
+    Ultrasonic ultrasonic(4, 4); //Pinos trigger e echo nessa ordem
     pinMode(3, OUTPUT);
+    pinMode(5, OUTPUT);
+    pinMode(A0, INPUT);
+    pinMode(A1, INPUT);
     Serial.begin(9600);
 }
 
 void loop()
 {
-    //PID
-    //Variaveis
-    unsigned long lastTime;
-    double Input, Output, Setpoint = 50;
-    double errSum, lastErr;
-    double kp, ki, kd;
-    double baseVelo = 300;
-    double timeChange;
-    int newVelo, attempt;
 
-    //Determinando parametros
-    kp = 1;
-    ki = 0.001;
-    kd = 0.005;
+    pid();
+    ultra_read();
+    infra_read();
+    control();
+    delay(10);
+}
 
-    //Colocando o valor lido no codigo
-    Input = 0.01723 * readUltrasonicDistance(4, 4);
-    Serial.println();
-    Serial.print("Leitura: ");
-    Serial.print(Input);
-    Serial.println();
+void ultra_read()
+{
+    //Le as informacoes do sensor em cm
+    microsec = ultrasonic.timing();
+    distance = ultrasonic.convert(microsec, Ultrasonic::CM); //Esse é o input para o PID
+}
 
-    Serial.print("PID");
-    Serial.println();
-    //Continhas do PID
+int infra_read()
+{
+    if ((analogRead(A1) < 100) && (analogRead(A0) < 100)) //Dois sensores cobertos
+    {
+        return 1;
+    }
+    else if (analogRead(A0) < 100 && analogRead(A1) > 100) //Sensor esquerdo coberto
+    {
+        return 2;
+    }
+    else if (analogRead(A1) < 100 && analogRead(A0) > 100) //Sensor esquerdo coberto
+    {
+        return 3;
+    }
+}
+
+void pid()
+{
     //Tempo entre esta e ultima medicao
     unsigned long now = millis();
-    timeChange = (double)(now - lastTime);
-
-    if (attempt != 1)
-    {
-        Serial.print("Attempt 1!");
-        attempt = 1;
-        timeChange = 0;
-        Input = 0, Output = 0;
-        errSum = 0, lastErr = 0;
-        newVelo = 0;
-    }
+    double time_change = (double)(now - last_time);
 
     //Calculo dos erros
-    double error = Input - Setpoint;
-    Serial.print("Error: ");
-    Serial.print(error);
-    Serial.println();
-
-    //Verificacao do tempo
-    Serial.print("Tempinho: ");
-    Serial.print(timeChange);
-    Serial.println();
-
-    errSum = errSum + (error * timeChange);
-    Serial.print("ErrSum: ");
-    Serial.print(errSum);
-    Serial.println();
-
-    double dErr = (error - lastErr) / timeChange;
-    Serial.print("dErr: ");
-    Serial.print(dErr);
-    Serial.println();
-
-    Serial.print("Output");
-    Serial.println();
+    error = input - setpoint;
+    err_sum += (error * time_change);
+    d_err = (error - last_err) / time_change;
 
     //Computando PIP
-    Output = (kp * error + ki * errSum + kd * dErr);
+    output = kp * error + ki * err_sum + kd * d_err;
 
     //Info para proxima vez
-    lastErr = error;
-    lastTime = now;
+    last_err = error;
+    last_time = now;
+}
 
-    //Alteração da velocidade
-    Serial.print("Output: ");
-    Serial.print(Output);
-    Serial.println();
+void control()
+{
+    //Alteracao nas velocidades
+    int left_speed = initial_speed + output;
+    int right_speed = initial_speed - output;
 
-    newVelo = baseVelo + Output;
-    analogWrite(3, newVelo);
-    Serial.print("Velocidade: ");
-    Serial.print(newVelo);
-    Serial.println();
+    //Restringindo a velocidade
+    constrain(left_speed, 0, 255);
+    constrain(right_speed, 0, 255);
 
-    delay(10); // Delay a little bit to improve simulation performance
+    int case_speed = infra_read();
+
+    int case_speed = infra_read();
+
+    switch (case_speed)
+    {
+    case 1:                          //Dois sensores cobertos
+        analogWrite(3, right_speed); //Motor direito
+        analogWrite(5, left_speed);  //Motor esquerdo
+        break;
+
+    case 2:                          //Sensor esquerdo coberto
+        analogWrite(3, right_speed); //Motor direito
+        analogWrite(5, left_speed);  //Motor esquerdo
+        break;
+
+    case 3:                          //Sensor direito coberto
+        analogWrite(3, right_speed); //Motor direito
+        analogWrite(5, left_speed);  //Motor esquerdo
+        break;
+        
+    default:                         //Nenhum sensor coberto
+        analogWrite(3, right_speed); //Motor direito
+        analogWrite(5, left_speed);  //Motor esquerdo
+        break;
+    }
 }
