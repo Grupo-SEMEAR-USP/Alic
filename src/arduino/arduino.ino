@@ -17,71 +17,111 @@
 #define TAMBOR_PIN 9
 #define MEC_PIN 10
 
-
+/*defines bluetooth*/
 #define PROXIMO_COMANDO '2'
-#define INBUFS 5
+#define BUF_LIDO_T 5
 
-SoftwareSerial pc_blue(BT_RX, BT_TX);
+/*defines cores*/
+#define TAMBOR_PARAR 89
+#define TEMPO_ESP 3500
+#define ANG_MEC 45
+
+
+/*globais bluetooth*/
+SoftwareSerial bt_serial(BT_RX, BT_TX);
+unsigned int buf_lido[BUF_LIDO_T]; //buffer de entrada, guarda os inputs de bluetooth
+int b_lido = 0; //a posicao no buffer que temos que ler ainda
+
+/*globais cores*/
 Servo tambor;
 Servo mec;
-unsigned int inbuf[INBUFS]; //buffer de entrada, guarda os inputs de bluetooth
-int rbyte = 0; //a posicao no buffer que temos que ler ainda
+int cor_atual = 0;
+int tempo_ant = 0;
+int sentido = TAMBOR_PARAR;
 
 
-void change_color(int newcolor);
-void draw_line(long x, long y);
-void goto_pos(long x, long y);
-void read_bt(void);
+/*funções*/
+void mudar_cor(int nova_cor);
+void desehar_linha(long x, long y);
+void ir_para_pos(long x, long y);
+void ler_bt(void);
 
 
-void change_color(int newcolor){
+void mudar_cor(int nova_cor){
     PRINTD("color: ");
-    PRINTD(newcolor);
+    PRINTD(nova_cor);
     PRINTD("\n");
 
-    switch(newcolor){
-    case 1: //cor amarela
-        if(tambor.read()!=45){
+    switch(nova_cor){
+    case 1: //cor amarela no 45
+        if(cor_atual!=1){
             mec.write(0);
-            delay(3000);
-            tambor.write(0); //arumar ordem e fazer delay--feito!
+            delay(TEMPO_ESP);
+            tambor.write(178-sentido); //arumar ordem e fazer delay--feito!
+            delay(tempo_ant);
+            tambor.write(TAMBOR_PARAR);
         }
-        tambor.write(45);
-        delay(3500);
-        mec.write(45);
+
+        cor_atual=1;
+        tempo_ant=2000;
+        sentido=95;
+        
+        tambor.write(95);
+        delay(2000);
+        tambor.write(TAMBOR_PARAR);
+        delay(TEMPO_ESP);
+        mec.write(ANG_MEC);
         break;
 
     case 2: //cor azul
-        if(tambor.read()!=90){
+        if(cor_atual!=2){
             mec.write(0);
-            delay(3000);
-            tambor.write(0);
+            delay(TEMPO_ESP);
+            tambor.write(178-sentido); //arumar ordem e fazer delay--feito!
+            delay(tempo_ant);
+            tambor.write(TAMBOR_PARAR);
         }
-        tambor.write(90);
-        delay(3500);
-        mec.write(45);
+
+        cor_atual=2;
+        tempo_ant=4000;
+        sentido=95;
+        
+        tambor.write(95);
+        delay(tempo_ant);
+        tambor.write(TAMBOR_PARAR);
+        delay(TEMPO_ESP);
+        mec.write(ANG_MEC);
         break;
 
     case 3: //cor verde
-        if(tambor.read()!=135){
+        if(cor_atual!=3){
             mec.write(0);
-            delay(3000);
-            tambor.write(0);
+            delay(TEMPO_ESP);
+            tambor.write(178-sentido); //arumar ordem e fazer delay--feito!
+            delay(tempo_ant);
+            tambor.write(TAMBOR_PARAR);
         }
-    
-        tambor.write(135);
-        delay(3500);
-        mec.write(45);
-    break;
+
+        cor_atual=3;
+        tempo_ant=6000;
+        sentido=95;
+        
+        tambor.write(sentido);
+        delay(tempo_ant);
+        tambor.write(TAMBOR_PARAR);
+        delay(TEMPO_ESP);
+        mec.write(ANG_MEC);
+      
+        break;
 
     default:
         Serial.println("SEM COR!");
-        pc_blue.println("SEM COR!");
+        bt_serial.println("SEM COR!");
         break;
-  }
+    }
 }
 
-void draw_line(long x, long y){
+void desehar_linha(long x, long y){
     PRINTD("line: ");
     PRINTD(x);
     PRINTD(" ");
@@ -91,7 +131,7 @@ void draw_line(long x, long y){
     //motorezinhos go!
 }
 
-void goto_pos(long x, long y){
+void ir_para_pos(long x, long y){
     PRINTD("goto: ");
     PRINTD(x);
     PRINTD(" ");
@@ -101,56 +141,56 @@ void goto_pos(long x, long y){
     //motorezinhos go!
 }
 
-void read_bt(void){
+void ler_bt(void){
     //esse if e necessario se nao poderiamos estar tentando 
     //ler informacao que nao chegou ainda
-    if(!pc_blue.available())
+    if(!bt_serial.available())
         return;
     
     //caso tenha informação na serial, lê ela
-    inbuf[rbyte++] = pc_blue.read();
-    if(rbyte != INBUFS)
+    buf_lido[b_lido++] = bt_serial.read();
+    if(b_lido != BUF_LIDO_T)
         return;
     
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
-    rbyte = 0;
+    b_lido = 0;
     long x, y;
-    switch(inbuf[0]){
+    switch(buf_lido[0]){
     case 'g':
-        x = (inbuf[1] << 8) + inbuf[2];
-        y = (inbuf[3] << 8) + inbuf[4];
-        goto_pos(x/50, y/50);
+        x = (buf_lido[1] << 8) + buf_lido[2];
+        y = (buf_lido[3] << 8) + buf_lido[4];
+        ir_para_pos(x/50, y/50);
         break;
     case 'l':
-        x = (inbuf[1] << 8) + inbuf[2];
-        y = (inbuf[3] << 8) + inbuf[4];
-        draw_line(x/50, y/50);
+        x = (buf_lido[1] << 8) + buf_lido[2];
+        y = (buf_lido[3] << 8) + buf_lido[4];
+        desehar_linha(x/50, y/50);
         break;
     case 'c':
-        change_color(inbuf[1]);
+        mudar_cor(buf_lido[1]);
         break;
     default:
         Serial.println("NAO TEM COMANDO!");
-        pc_blue.println("NAO TEM COMANDO!");
+        bt_serial.println("NAO TEM COMANDO!");
         break;
     }
-    pc_blue.write(PROXIMO_COMANDO);
+    bt_serial.write(PROXIMO_COMANDO);
 }
 
 
 void setup(){
-    //inicialização dos servos
+    //inicialização dos motores de cor
     tambor.attach(TAMBOR_PIN);
     mec.attach(MEC_PIN);
 
-    tambor.write(0);
+    tambor.write(TAMBOR_PARAR);
     mec.write(0);
 
     //inicialização de interfaces seriais
-    pc_blue.begin(9600);
+    bt_serial.begin(9600);
     Serial.begin(9600);
 }
 
 void loop(){
-    read_bt();
+    ler_bt();
 }
