@@ -1,6 +1,5 @@
-// C++ code
-//
 #include <Ultrasonic.h> //Biblioteca para o sensor ultrassonico
+#include <EEPROM.h>
 
 //Variaveis do pid
 unsigned long last_time = 0;
@@ -19,7 +18,6 @@ int initial_speed = 100;
 //Funcoes
 void pid();
 void ultra_read();
-int infra_read();
 void control();
 
 void setup()
@@ -49,22 +47,6 @@ void ultra_read()
     distance = ultrasonic.convert(microsec, Ultrasonic::CM); //Esse é o input para o PID
 }
 
-int infra_read()
-{
-    if ((analogRead(A1) < 100) && (analogRead(A0) < 100)) //Dois sensores cobertos
-    {
-        return 1;
-    }
-    else if (analogRead(A0) < 100 && analogRead(A1) > 100) //Sensor esquerdo coberto
-    {
-        return 2;
-    }
-    else if (analogRead(A1) < 100 && analogRead(A0) > 100) //Sensor esquerdo coberto
-    {
-        return 3;
-    }
-}
-
 void pid()
 {
     //Tempo entre esta e ultima medicao
@@ -88,36 +70,42 @@ void control()
 {
     //Alteracao nas velocidades
     int left_speed = initial_speed + output;
-    int right_speed = initial_speed + output;
+    int right_speed = initial_speed - output;
 
     //Restringindo a velocidade
     constrain(left_speed, 0, 255);
     constrain(right_speed, 0, 255);
 
-    int case_speed = infra_read();
+    int left = analogRead(A0);
+    int right = analogRead(A1);
 
-    int case_speed = infra_read();
+    Serial.print("Left: ");
+    Serial.println(left);
+    Serial.print("Right: ");
+    Serial.println(right);
 
-    switch (case_speed)
+    float curve = 0.5; //Parâmetro de redução de velocidade;
+
+    if (left < 100 && right < 100) //Dois sensores cobertos
     {
-    case 1:                          //Dois sensores cobertos
         analogWrite(3, right_speed); //Motor direito
         analogWrite(5, left_speed);  //Motor esquerdo
-        break;
-
-    case 2:                          //Sensor esquerdo coberto
+    }
+    if (left < 100 && right > 100) //Sensor esquerdo coberto
+    {
+        left_speed = curve * left_speed;
         analogWrite(3, right_speed); //Motor direito
         analogWrite(5, left_speed);  //Motor esquerdo
-        break;
-
-    case 3:                          //Sensor direito coberto
+    }
+    if (left > 100 && right < 100) //Sensor direito coberto
+    {
+        right_speed = curve * right_speed;
         analogWrite(3, right_speed); //Motor direito
         analogWrite(5, left_speed);  //Motor esquerdo
-        break;
-        
-    default:                         //Nenhum sensor coberto
+    }
+    if (left > 100 && right > 100) //Dois sensores cobertos
+    {
         analogWrite(3, right_speed); //Motor direito
         analogWrite(5, left_speed);  //Motor esquerdo
-        break;
     }
 }
