@@ -14,6 +14,7 @@
 /*defines de pins*/
 #define BT_RX 2
 #define BT_TX 3
+#define SENSOR_FRENTE 4
 #define TAMBOR_PIN 9
 #define MEC_PIN 10
 
@@ -25,6 +26,11 @@
 #define TAMBOR_PARAR 89
 #define TEMPO_ESP 3500
 #define ANG_MEC 45
+
+/*defines movimento*/
+#define KP 1
+#define KI 0.001
+#define KD 0.005
 
 
 /*globais bluetooth*/
@@ -39,12 +45,18 @@ int cor_atual = 0;
 int tempo_ant = 0;
 int sentido = TAMBOR_PARAR;
 
+/*globais função autônoma*/
+long x_agora = 0, y_agora = 0;
+
+/*globais função controlada*/
+bool funcao_controlada = true;
 
 /*funções*/
 void mudar_cor(int nova_cor);
 void desehar_linha(long x, long y);
 void ir_para_pos(long x, long y);
 void ler_bt(void);
+void seguir_mao(void);
 
 
 void mudar_cor(int nova_cor){
@@ -138,7 +150,14 @@ void ir_para_pos(long x, long y){
     PRINTD(y);
     PRINTD("\n");
 
-    //motorezinhos go!
+    long dx = x - x_agora;
+    long dy = y - y_agora;
+
+    mec.write(0); //sobe o mec
+
+
+
+    mec.write(ANG_MEC); //desce o mec
 }
 
 void ler_bt(void){
@@ -169,6 +188,9 @@ void ler_bt(void){
     case 'c':
         mudar_cor(buf_lido[1]);
         break;
+    case 'f':
+        funcao_controlada = buf_lido[1] == 0;
+        break;
     default:
         Serial.println("NAO TEM COMANDO!");
         bt_serial.println("NAO TEM COMANDO!");
@@ -177,6 +199,9 @@ void ler_bt(void){
     bt_serial.write(PROXIMO_COMANDO);
 }
 
+void seguir_mao(void){
+    
+}
 
 void setup(){
     //inicialização dos motores de cor
@@ -193,4 +218,8 @@ void setup(){
 
 void loop(){
     ler_bt();
+
+    if(funcao_controlada){
+        seguir_mao();
+    }
 }
