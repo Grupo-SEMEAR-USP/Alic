@@ -79,11 +79,6 @@ void control()
     int left = analogRead(A0);
     int right = analogRead(A1);
 
-    Serial.print("Left: ");
-    Serial.println(left);
-    Serial.print("Right: ");
-    Serial.println(right);
-
     float curve = 0.5; //Parâmetro de redução de velocidade;
 
     if (left < 100 && right < 100) //Dois sensores cobertos
