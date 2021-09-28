@@ -1,18 +1,13 @@
 #!/usr/bin/python3
 #módulos necessários: xml, svg.path, pyserial, numpy
 
-#TODO:
-# ver formas de evitar erros de posição carteziana nas linhas
-
-from svg.path import parse_path
-from svg.path.path import Move, Line, Arc, QuadraticBezier, CubicBezier, Close
-from xml.dom import minidom
+from svg.path.path import Move, Line, Close
 import struct
 import serial
-import time
 import sys
 import numpy as np
-import math as m
+
+from svgutils import parseSVG, Rectangle
 
 #cores: branco, preto, vermelho, verde, azul escuro, amarelo, roxo, azul bebê
 pic_colors = np.array([
@@ -21,14 +16,12 @@ pic_colors = np.array([
     [1, 1, 0], [1, 0, 1], [0, 1, 1]
 ])
 
-
 def PICInit(com, w, h):
     PIC = serial.Serial(com)
     return PIC
 
 def PICEnd(PIC):
     PIC.close()
-
 
 #função que manda as informações para o pic
 #formatação da informação:
@@ -86,86 +79,19 @@ def goTo(PIC, x, y):
     PICSend(PIC, "goto", x, y)
 
 
-#porque o formato de svg é pouco padronizado, 
-#tem alguns arquivos que tem um sulfixo de mm ou px;
-#então tira isso
-def strToFloatForce(s):
-    nums = ""
-    for c in s:
-        if c.isdigit() or c == '.':
-            nums += c
-    return float(nums)
-
-#converte um hexadecimal de 6 caracteres em um conjunto de rgb de zero a um
-def rgbfromhex(s):
-    print(s)
-    try:
-        r = int(s[0:2], 16)/255
-        g = int(s[2:4], 16)/255
-        b = int(s[4:6], 16)/255
-    except ValueError: #ignora se a cor for "green" e não 00ff00
-        print("aaaa")
-        r, g, b = 0, 0, 0
-    return (r, g, b)
-
-#pega o arquivo de svg e retorna o tamanho, caminhos e cores dele
-def parseSVG(filename):
-    #le o arquivo
-    doc = minidom.parse(filename)
-
-    metadata = doc.getElementsByTagName('svg')[0]
-    wattribute = metadata.getAttribute('width')
-    hattribute = metadata.getAttribute('height')
-    
-    if wattribute == "" or hattribute == "":
-        print("Warning: no width or height attribute found", file=sys.stderr)
-        w, h = 500, 500
-    else:
-        w = strToFloatForce(wattribute)
-        h = strToFloatForce(hattribute) 
-
-    paths = [] #total de caminhos
-    colors = [] #cor de cada caminho
-    for path_xml in doc.getElementsByTagName('path'):
-        #existem outras tags além de path, mas até agora só foi implementado ele
-        path_str = path_xml.getAttribute('d')
-
-        #pega a cor do stroke ou usa fill como falback 
-        stroke = path_xml.getAttribute('stroke')
-        fill = path_xml.getAttribute('fill')
-        style = path_xml.getAttribute('style')
-        style_stroke_i = style.find("stroke:#")
-        style_fill_i = style.find("fill:#")
-        
-        if stroke != "":
-            r, g, b = rgbfromhex(stroke[1:])
-        elif style_stroke_i != -1:
-            style_stroke_i += len("stroke:#")
-            r, g, b = rgbfromhex(style[style_stroke_i:style_stroke_i+6])
-        elif fill != "":
-            r, g, b = rgbfromhex(fill[1:])
-        elif style_fill_i != -1:
-            style_fill_i += len("fill:#")
-            r, g, b = rgbfromhex(style[style_fill_i:style_fill_i+6])
-        else:
-            r, g, b = 0, 0, 0
-
-        paths.append(parse_path(path_str))
-        colors.append((r, g, b))
-
-    doc.unlink()
-    return (w, h, paths, colors)
-
-
 #desenha um caminho
 def drawPath(PIC, path, detail):
     for e in path: #para cada elemento no caminho (curva, linha, etc)
         if isinstance(e, Move):
             goTo(PIC, e.start.real, e.start.imag)
         elif isinstance(e, Line) or isinstance(e, Close):
-            x = e.end.real
-            y = e.end.imag
-            drawLine(PIC, x, y)
+            drawLine(PIC, e.end.real, e.end.imag)
+        elif isinstance(e, Rectangle):
+            drawLine(PIC, e.start.real+e.width, e.start.imag)
+            drawLine(PIC, e.start.real+e.width, e.start.imag+e.height)
+            drawLine(PIC, e.start.real, e.start.imag+e.height)
+            drawLine(PIC, e.start.real, e.start.imag)
+            
         #o módulo svg.path tem a útil função que pega um parâmetro t de zero a um e
         #retorna um ponto na curva, sendo que em t=0 é o início da curva e t=1 é o final
         #e aparentemente ele é implementado para quase todas as classes de path

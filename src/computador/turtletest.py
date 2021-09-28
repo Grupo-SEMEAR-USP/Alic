@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 #módulos necessários: turtle e os de draw.py
 
-from draw import *
+from PICdraw import drawPath, PICEnd, setColor, pic_colors
+from svgutils import parseSVG
 import turtle as tr
 import struct
+import sys
 
 #PIC falso:
 #uma dummy class que só foi criada para reutilizar o máximo de código de draw.py
@@ -32,7 +34,7 @@ class FakePic:
             x, y = struct.unpack(">HH", buf[1:5])
             self.tur.goto(x/50, y/50)
         else:
-            raise ValueError
+            raise ValueError("PIC does not have the command sent")
         
         self.data_transferred += 5
 

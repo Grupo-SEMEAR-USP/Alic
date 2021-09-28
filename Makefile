@@ -16,7 +16,7 @@ INO_FILES    = $(wildcard $(ARDUINO_SRC)/*.ino $(ARDUINO_SRC)/*.cpp $(ARDUINO_SR
 RES         ?= ./res
 
 PY_SRC       = $(SRC)/computador
-PY_DRAW_NAME  = draw.py
+PY_DRAW_NAME  = PICdraw.py
 PY_TR_NAME    = turtletest.py
 PY_TEST_SVG  = $(RES)/Logo\ NRE.svg
 EXTRA_FLAGS ?= \"-Wall\" \"-Wextra\"
