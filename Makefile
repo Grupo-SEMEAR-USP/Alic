@@ -11,7 +11,6 @@ INO_BUILDD  ?= $(BUILDD)/build
 
 SRC          = ./src
 ARDUINO_SRC  = $(SRC)/arduino
-INO_FILES    = $(wildcard $(ARDUINO_SRC)/*.ino $(ARDUINO_SRC)/*.cpp $(ARDUINO_SRC)/*.c)
 
 RES         ?= ./res
 
@@ -52,7 +51,7 @@ pyturtle:
 
 
 $(HEX_FILE): $(INO_FILES)
-	arduino-cli compile --fqbn $(FQBN) $(INO_FILES) --build-property "build.extra_flags=$(EXTRA_FLAGS)" --export-binaries
+	arduino-cli compile --fqbn $(FQBN) $(ARDUINO_SRC) --build-property "build.extra_flags=$(EXTRA_FLAGS)" --export-binaries
 	@mkdir $(BUILDD) 2>/dev/null | true
 	@rm -rf $(BUILDD)/build
 	@mv -fu $(ARDUINO_SRC)/build $(BUILDD)

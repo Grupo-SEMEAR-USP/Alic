@@ -1,6 +1,8 @@
-#include <Servo.h>
-#include <SoftwareSerial.h>
+#include <Servo.h> //Biblioteca para servomotores
+#include <SoftwareSerial.h> //Biblioteca para a interface serial de bluetooth
+#include <Ultrasonic.h>
 
+#include "controle.h"
 
 //caso seja uma build de debug (como definido no Makefile) cria esse macro
 //se nao, ignora toda a vez que ele aparecer
@@ -14,7 +16,6 @@
 /*defines de pins*/
 #define BT_RX 2
 #define BT_TX 3
-#define SENSOR_FRENTE 4
 #define TAMBOR_PIN 9
 #define MEC_PIN 10
 
@@ -26,11 +27,6 @@
 #define TAMBOR_PARAR 89
 #define TEMPO_ESP 3500
 #define ANG_MEC 45
-
-/*defines movimento*/
-#define KP 1
-#define KI 0.001
-#define KD 0.005
 
 
 /*globais bluetooth*/
@@ -200,10 +196,23 @@ void ler_bt(void){
 }
 
 void seguir_mao(void){
-    
+    pid();
+    leitura_ultra();
+    controle();
 }
 
 void setup(){
+    //inicialização do sensor ultrassonico
+    Ultrasonic ultrasonic(SENSOR_FRENTE, SENSOR_FRENTE); //Pinos trigger e echo nessa ordem
+
+    //inicialização dos motores de movimento
+    pinMode(3, OUTPUT);
+    pinMode(5, OUTPUT);
+
+    //inicialização sensores infravermelhos
+    pinMode(A0, INPUT);
+    pinMode(A1, INPUT);
+
     //inicialização dos motores de cor
     tambor.attach(TAMBOR_PIN);
     mec.attach(MEC_PIN);
@@ -222,4 +231,6 @@ void loop(){
     if(funcao_controlada){
         seguir_mao();
     }
+
+    delay(10);
 }
