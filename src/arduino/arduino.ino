@@ -1,8 +1,8 @@
 #include <Servo.h> //Biblioteca para servomotores
-#include <SoftwareSerial.h> //Biblioteca para a interface serial de bluetooth
 #include <Ultrasonic.h>
 
-#include "controle.h"
+#include "controle.hpp"
+#include "bluetooth.hpp"
 
 //caso seja uma build de debug (como definido no Makefile) cria esse macro
 //se nao, ignora toda a vez que ele aparecer
@@ -14,25 +14,15 @@
 
 
 /*defines de pins*/
-#define BT_RX 2
-#define BT_TX 3
 #define TAMBOR_PIN 9
 #define MEC_PIN 10
 
-/*defines bluetooth*/
-#define PROXIMO_COMANDO '2'
-#define BUF_LIDO_T 5
 
 /*defines cores*/
 #define TAMBOR_PARAR 89
 #define TEMPO_ESP 3500
 #define ANG_MEC 45
 
-
-/*globais bluetooth*/
-SoftwareSerial bt_serial(BT_RX, BT_TX);
-unsigned int buf_lido[BUF_LIDO_T]; //buffer de entrada, guarda os inputs de bluetooth
-int b_lido = 0; //a posicao no buffer que temos que ler ainda
 
 /*globais cores*/
 Servo tambor;
@@ -51,9 +41,25 @@ bool funcao_controlada = true;
 void mudar_cor(int nova_cor);
 void desehar_linha(long x, long y);
 void ir_para_pos(long x, long y);
-void ler_bt(void);
 void seguir_mao(void);
+void desenhar_prepronto(int cmd);
 
+void desenhar_prepronto(int cmd){
+    switch(cmd){
+    case 1:
+        PRINTD("casa");
+        break;
+    case 2:
+        PRINTD("sol");
+    case 3:
+        PRINTD("NRE");
+        break;
+    default:
+        Serial.println("CMD ERRADO!");
+        bt_serial.println("CMD ERRADO!");
+        break;
+    }
+}
 
 void mudar_cor(int nova_cor){
     PRINTD("color: ");
@@ -154,45 +160,6 @@ void ir_para_pos(long x, long y){
 
 
     mec.write(ANG_MEC); //desce o mec
-}
-
-void ler_bt(void){
-    //esse if e necessario se nao poderiamos estar tentando 
-    //ler informacao que nao chegou ainda
-    if(!bt_serial.available())
-        return;
-    
-    //caso tenha informação na serial, lê ela
-    buf_lido[b_lido++] = bt_serial.read();
-    if(b_lido != BUF_LIDO_T)
-        return;
-    
-    //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
-    b_lido = 0;
-    long x, y;
-    switch(buf_lido[0]){
-    case 'g':
-        x = (buf_lido[1] << 8) + buf_lido[2];
-        y = (buf_lido[3] << 8) + buf_lido[4];
-        ir_para_pos(x/50, y/50);
-        break;
-    case 'l':
-        x = (buf_lido[1] << 8) + buf_lido[2];
-        y = (buf_lido[3] << 8) + buf_lido[4];
-        desehar_linha(x/50, y/50);
-        break;
-    case 'c':
-        mudar_cor(buf_lido[1]);
-        break;
-    case 'f':
-        funcao_controlada = buf_lido[1] == 0;
-        break;
-    default:
-        Serial.println("NAO TEM COMANDO!");
-        bt_serial.println("NAO TEM COMANDO!");
-        break;
-    }
-    bt_serial.write(PROXIMO_COMANDO);
 }
 
 void seguir_mao(void){

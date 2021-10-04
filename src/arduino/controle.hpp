@@ -1,5 +1,5 @@
-#ifndef __CONTROLE_H__
-#define __CONTROLE_H__
+#ifndef __CONTROLE_HPP__
+#define __CONTROLE_HPP__
 
 /*defines movimento*/
 #define KP 1

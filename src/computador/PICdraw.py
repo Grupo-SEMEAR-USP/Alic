@@ -16,7 +16,7 @@ pic_colors = np.array([
     [1, 1, 0], [1, 0, 1], [0, 1, 1]
 ])
 
-def PICInit(com, w, h):
+def PICInit(com):
     PIC = serial.Serial(com)
     return PIC
 
@@ -41,9 +41,13 @@ def PICSend(PIC, cmd, *args):
     elif cmd == "color":
         buf += b'c'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
-        buf += b'\n\n\n'
-    else:
-        raise ValueError
+        buf += b'\0\0\0'
+    elif cmd == "preprog":
+        buf += b'p'
+        buf += int(args[0]).to_bytes(length=1, byteorder="big")
+        buf += b'\0\0\0'
+    elif:
+        raise ValueError("O PIC não tem esse comando!")
 
     #o primeiro comando escreve incondicionalmente, depois vê quando pode mandar o próximo
     PIC.write(buf)
@@ -103,23 +107,32 @@ def drawPath(PIC, path, detail):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print(
-        f"Erro! use: {sys.argv[0]} COM_port arquivo.svg detalhe_no_caminho(>=1)", 
+        f"Erro! use: {sys.argv[0]} COM_port comando", 
         file=sys.stderr)
         sys.exit(-1)
 
-    #le o svg
-    w, h, paths, colors = parseSVG(sys.argv[2])
-
     #inicializa o PIC :)
-    PIC = PICInit(sys.argv[1], w, h)
+    PIC = PICInit(sys.argv[1])
 
-    #desenha todos os caminhos do arquivo
-    for path, color in zip(paths, colors):
-        #coloca a cor correta
-        setColor(PIC, color)
-        #e desenha o caminho!
-        drawPath(PIC, path, int(sys.argv[3]))
+    #se o comando for um arquivo svg, lê e desenha ele
+    if sys.argv[2][:-4] == ".svg" and len(sys.argv == 4):
+
+        #le o svg
+        w, h, paths, colors = parseSVG(sys.argv[2])
+
+        #desenha todos os caminhos do arquivo
+        for path, color in zip(paths, colors):
+            #coloca a cor correta
+            setColor(PIC, color)
+            #e desenha o caminho!
+            drawPath(PIC, path, int(sys.argv[3]))
+    elif sys.argv[2] == "casa":
+        PICSend(PIC, "preprog", 1)
+    elif sys.argv[2] == "sol":
+        PICSend(PIC, "preprog", 2)
+    elif sys.argv[2] == "NRE":
+        PICSend(PIC, "preprog", 3)
 
     PICEnd(PIC)
