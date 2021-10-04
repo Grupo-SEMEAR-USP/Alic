@@ -3,17 +3,17 @@
 #include "controle.hpp"
 
 /*Globais sensores ultrassonicos*/
-float distance = 0;
-long microsec = 0;
+static float distance = 0;
+static long microsec = 0;
 
 /*Globais controle*/
-Ultrasonic ultrasonic(SENSOR_FRENTE, SENSOR_FRENTE);
-unsigned long last_time = 0;
-double input = 0, output = 0, setpoint = 0;             //Valor do sensor, resultado e valor ideal
-double err_sum = 0, last_err = 0, error = 0, d_err = 0; //Erros
+extern Ultrasonic ultrasonic;
+static unsigned long last_time = 0;
+static double input = 0, output = 0, setpoint = 0;             //Valor do sensor, resultado e valor ideal
+static double err_sum = 0, last_err = 0, error = 0, d_err = 0; //Erros
 
 /*Globais motores*/
-int initial_speed = 100;
+static int initial_speed = 100;
 
 
 void pid(void){
@@ -50,27 +50,27 @@ void controle(void){
     constrain(left_speed, 0, 255);
     constrain(right_speed, 0, 255);
 
-    int left = analogRead(A0);
-    int right = analogRead(A1);
+    int left = analogRead(INFRA_ESQ);
+    int right = analogRead(INFRA_DIR);
 
     float curve = 0.5; //Parâmetro de redução de velocidade;
 
     if (left < 100 && right < 100){ //Dois sensores cobertos
-        analogWrite(3, right_speed); //Motor direito
-        analogWrite(5, left_speed);  //Motor esquerdo
+        analogWrite(RODA_DIR_PIN, right_speed); //Motor direito
+        analogWrite(RODA_ESQ_PIN, left_speed);  //Motor esquerdo
     }
     if (left < 100 && right > 100){ //Sensor esquerdo coberto
         left_speed = curve * left_speed;
-        analogWrite(3, right_speed); //Motor direito
-        analogWrite(5, left_speed);  //Motor esquerdo
+        analogWrite(RODA_DIR_PIN, right_speed); //Motor direito
+        analogWrite(RODA_ESQ_PIN, left_speed);  //Motor esquerdo
     }
     if (left > 100 && right < 100){ //Sensor direito coberto
         right_speed = curve * right_speed;
-        analogWrite(3, right_speed); //Motor direito
-        analogWrite(5, left_speed);  //Motor esquerdo
+        analogWrite(RODA_DIR_PIN, right_speed); //Motor direito
+        analogWrite(RODA_ESQ_PIN, left_speed);  //Motor esquerdo
     }
     if (left > 100 && right > 100){ //Dois sensores cobertos
-        analogWrite(3, right_speed); //Motor direito
-        analogWrite(5, left_speed);  //Motor esquerdo
+        analogWrite(RODA_DIR_PIN, right_speed); //Motor direito
+        analogWrite(RODA_ESQ_PIN, left_speed);  //Motor esquerdo
     }
 }

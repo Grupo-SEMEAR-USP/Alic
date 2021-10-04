@@ -1,4 +1,13 @@
+#include <SoftwareSerial.h> 
+
 #include "bluetooth.hpp"
+
+
+extern SoftwareSerial bt_serial;
+
+static unsigned int buf_lido[BUF_LIDO_T]; //buffer de entrada, guarda os inputs de bluetooth
+static int b_lido = 0; //a posicao no buffer que temos que ler ainda
+
 
 void ler_bt(void){
     //esse if e necessario se nao poderiamos estar tentando 
@@ -27,9 +36,6 @@ void ler_bt(void){
         break;
     case 'c':
         mudar_cor(buf_lido[1]);
-        break;
-    case 'f':
-        funcao_controlada = buf_lido[1] == 0;
         break;
     case 'p':
         desenhar_prepronto(buf_lido[1]);

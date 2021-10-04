@@ -1,6 +1,8 @@
 #include <Servo.h> //Biblioteca para servomotores
 #include <Ultrasonic.h>
+#include <SoftwareSerial.h>
 
+#include "pins.hpp"
 #include "controle.hpp"
 #include "bluetooth.hpp"
 
@@ -13,16 +15,17 @@
 #endif
 
 
-/*defines de pins*/
-#define TAMBOR_PIN 9
-#define MEC_PIN 10
-
-
 /*defines cores*/
 #define TAMBOR_PARAR 89
 #define TEMPO_ESP 3500
 #define ANG_MEC 45
 
+
+/*globais bluetooth*/
+SoftwareSerial bt_serial(BT_RX, BT_TX);
+
+/*globais controle*/
+Ultrasonic ultrasonic(SENSOR_FRENTE, SENSOR_FRENTE);
 
 /*globais cores*/
 Servo tambor;
@@ -31,11 +34,6 @@ int cor_atual = 0;
 int tempo_ant = 0;
 int sentido = TAMBOR_PARAR;
 
-/*globais função autônoma*/
-long x_agora = 0, y_agora = 0;
-
-/*globais função controlada*/
-bool funcao_controlada = true;
 
 /*funções*/
 void mudar_cor(int nova_cor);
@@ -152,9 +150,6 @@ void ir_para_pos(long x, long y){
     PRINTD(y);
     PRINTD("\n");
 
-    long dx = x - x_agora;
-    long dy = y - y_agora;
-
     mec.write(0); //sobe o mec
 
 
@@ -169,16 +164,13 @@ void seguir_mao(void){
 }
 
 void setup(){
-    //inicialização do sensor ultrassonico
-    Ultrasonic ultrasonic(SENSOR_FRENTE, SENSOR_FRENTE); //Pinos trigger e echo nessa ordem
-
     //inicialização dos motores de movimento
-    pinMode(3, OUTPUT);
-    pinMode(5, OUTPUT);
+    pinMode(RODA_ESQ_PIN, OUTPUT);
+    pinMode(RODA_DIR_PIN, OUTPUT);
 
     //inicialização sensores infravermelhos
-    pinMode(A0, INPUT);
-    pinMode(A1, INPUT);
+    pinMode(INFRA_ESQ, INPUT);
+    pinMode(INFRA_DIR, INPUT);
 
     //inicialização dos motores de cor
     tambor.attach(TAMBOR_PIN);
@@ -194,10 +186,7 @@ void setup(){
 
 void loop(){
     ler_bt();
-
-    if(funcao_controlada){
-        seguir_mao();
-    }
+    seguir_mao();
 
     delay(10);
 }
