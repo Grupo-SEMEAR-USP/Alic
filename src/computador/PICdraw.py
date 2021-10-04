@@ -46,7 +46,7 @@ def PICSend(PIC, cmd, *args):
         buf += b'p'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
         buf += b'\0\0\0'
-    elif:
+    else:
         raise ValueError("O PIC não tem esse comando!")
 
     #o primeiro comando escreve incondicionalmente, depois vê quando pode mandar o próximo
@@ -54,7 +54,7 @@ def PICSend(PIC, cmd, *args):
     print(f'{cmd}: ', *args)
     flag_byte = PIC.read(size=1)
     if flag_byte[0] != ord('2'):
-        raise IOError(f"Received a strange command \'{flag_byte}\'")
+        raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
 
 
 #desenha uma linha

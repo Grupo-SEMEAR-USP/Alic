@@ -10,15 +10,16 @@ extern Servo mec;
 void desenhar_prepronto(int cmd){
     switch(cmd){
     case 1:
-        PRINTD("casa");
+        PRINTD("casa\n");
         break;
     case 2:
-        PRINTD("sol");
+        PRINTD("sol\n");
+        break;
     case 3:
-        PRINTD("NRE");
+        PRINTD("NRE\n");
         break;
     default:
-        Serial.println("CMD ERRADO!");
+        Serial.println("CMD ERRADO!\n");
         break;
     }
 }

@@ -48,6 +48,7 @@ void ler_bt(void){
         break;
     case 'p':
         desenhar_prepronto(buf_lido[1]);
+        break;
     default:
         Serial.println("NAO TEM COMANDO!");
         break;
