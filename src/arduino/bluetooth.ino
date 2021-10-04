@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h> 
+#include <SoftwareSerial.h>
 
 #include "bluetooth.hpp"
 
@@ -41,7 +41,6 @@ void ler_bt(void){
         desenhar_prepronto(buf_lido[1]);
     default:
         Serial.println("NAO TEM COMANDO!");
-        bt_serial.println("NAO TEM COMANDO!");
         break;
     }
     bt_serial.write(PROXIMO_COMANDO);

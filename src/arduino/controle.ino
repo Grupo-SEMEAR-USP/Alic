@@ -1,4 +1,4 @@
-#include <Ultrasonic.h> //Biblioteca para o sensor ultrassonico
+#include <Ultrasonic.h> 
 
 #include "controle.hpp"
 
@@ -37,8 +37,8 @@ void pid(void){
 void leitura_ultra(void){
     //Le as informacoes do sensor em cm
     //TODO: pra mim dá erro de compilação aqui pq não existe Ultrasonic::CM e timing é uma função privada
-    microsec = ultrasonic.timing();
-    distance = ultrasonic.convert(microsec, Ultrasonic::CM); //Esse é o input para o PID
+    //microsec = ultrasonic.timing();
+    //distance = ultrasonic.convert(microsec, Ultrasonic::CM); //Esse é o input para o PID
 }
 
 void controle(void){
