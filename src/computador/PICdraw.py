@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #módulos necessários: xml, svg.path, pyserial, numpy
 
 from svg.path.path import Move, Line, Close

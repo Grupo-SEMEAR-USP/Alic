@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #módulos necessários: turtle e os de draw.py
 
 from PICdraw import drawPath, PICEnd, setColor, pic_colors
