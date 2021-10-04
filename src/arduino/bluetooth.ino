@@ -27,7 +27,7 @@ void ler_bt(void){
     
     PRINTD("cmd: ");
     PRINTD((char) buf_lido[0]);
-    PRIND('\n');
+    PRINTD('\n');
 
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
     b_lido = 0;

@@ -5,6 +5,8 @@
 #include "pins.hpp"
 #include "controle.hpp"
 #include "bluetooth.hpp"
+#include "movimento.hpp"
+#include "cores.hpp"
 
 
 /*globais bluetooth*/
