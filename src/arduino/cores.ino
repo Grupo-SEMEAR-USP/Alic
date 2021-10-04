@@ -1,6 +1,7 @@
 #include <Servo.h>
 
 #include "cores.hpp"
+#include "utils.hpp"
 
 
 extern Servo tambor;
@@ -12,7 +13,7 @@ static int sentido = TAMBOR_PARAR;
 
 
 void mudar_cor(int nova_cor){
-    PRINTD("color: ");
+    PRINTD("cor: ");
     PRINTD(nova_cor);
     PRINTD("\n");
 

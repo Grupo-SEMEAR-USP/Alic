@@ -1,6 +1,7 @@
 #include <Servo.h>
 
 #include "movimento.hpp"
+#include "utils.hpp"
 
 
 extern Servo mec;

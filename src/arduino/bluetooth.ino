@@ -1,6 +1,9 @@
 #include <SoftwareSerial.h>
 
 #include "bluetooth.hpp"
+#include "movimento.hpp"
+#include "cores.hpp"
+#include "utils.hpp"
 
 
 extern SoftwareSerial bt_serial;
@@ -15,11 +18,17 @@ void ler_bt(void){
     if(!bt_serial.available())
         return;
     
+    PRINTD("lendo bt\n");
+
     //caso tenha informação na serial, lê ela
     buf_lido[b_lido++] = bt_serial.read();
     if(b_lido != BUF_LIDO_T)
         return;
     
+    PRINTD("cmd: ");
+    PRINTD((char) buf_lido[0]);
+    PRIND('\n');
+
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
     b_lido = 0;
     long x, y;
