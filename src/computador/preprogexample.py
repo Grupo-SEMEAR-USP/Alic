@@ -26,8 +26,8 @@ def desenhar_casa():
 
 
 def desenhar_estrela():
-    init_prepronto(0, 80)
-    L = 300
+    init_prepronto(0, 250)
+    L = 500
 
     tr.left(-(90-18))
     for i in range(5):
@@ -51,6 +51,7 @@ def desenhar_NRE():
         for th, d in ent_l[i]:
             rotevai(th, d)
         tr.down()
+
 
 nome_fun_dict = {"casa": desenhar_casa, "estrela": desenhar_estrela, "NRE": desenhar_NRE}
 
