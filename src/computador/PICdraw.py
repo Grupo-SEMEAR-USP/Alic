@@ -116,7 +116,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     #inicializa o PIC :)
-    PIC = 0#PICInit(sys.argv[1])
+    PIC = PICInit(sys.argv[1])
 
     #se o comando for um arquivo svg, lê e desenha ele
     if sys.argv[2][:-4] == ".svg" and len(sys.argv == 4):
