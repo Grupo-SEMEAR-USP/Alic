@@ -105,6 +105,8 @@ def drawPath(PIC, path, detail):
                 x, y = p.real, p.imag
                 drawLine(PIC, x, y)
 
+name_preprogs = ["casa", "estrela", "NRE"]
+name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -114,7 +116,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     #inicializa o PIC :)
-    PIC = PICInit(sys.argv[1])
+    PIC = 0#PICInit(sys.argv[1])
 
     #se o comando for um arquivo svg, lê e desenha ele
     if sys.argv[2][:-4] == ".svg" and len(sys.argv == 4):
@@ -128,11 +130,11 @@ if __name__ == "__main__":
             setColor(PIC, color)
             #e desenha o caminho!
             drawPath(PIC, path, int(sys.argv[3]))
-    elif sys.argv[2] == "casa":
-        PICSend(PIC, "preprog", 1)
-    elif sys.argv[2] == "sol":
-        PICSend(PIC, "preprog", 2)
-    elif sys.argv[2] == "NRE":
-        PICSend(PIC, "preprog", 3)
-
+    
+    elif sys.argv[2] in name_colors:
+        PICSend(PIC, "color", name_colors.index(sys.argv[2])+1)
+    elif sys.argv[2] in name_preprogs:
+        PICSend(PIC, "preprog", name_preprogs.index(sys.argv[2])+1)
+    else:
+        print("Não foi possível interpretar o comando", file=sys.stderr)
     PICEnd(PIC)

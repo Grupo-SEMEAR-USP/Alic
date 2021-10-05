@@ -18,7 +18,7 @@ PY_SRC       = $(SRC)/computador
 PY_DRAW_NAME = PICdraw.py
 PY_TR_NAME   = turtletest.py
 PY_TEST_SVG  = $(RES)/Logo\ NRE.svg
-EXTRA_FLAGS ?= \"-Wall\" \"-Wextra\"
+EXTRA_FLAGS ?= -Wall -Wextra
 
 
 OUT_FILE ?= arduino.ino.with_bootloader.hex
@@ -34,7 +34,7 @@ clean:
 	@rm -rf $(BUILDD)
 
 
-ino: EXTRA_FLAGS+=\"-DNODEBUG\"
+ino: EXTRA_FLAGS+=-DNODEBUG
 ino: $(HEX_FILE)
 
 debug: $(HEX_FILE)
