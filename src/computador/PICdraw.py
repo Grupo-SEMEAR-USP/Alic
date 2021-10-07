@@ -46,6 +46,9 @@ def PICSend(PIC, cmd, *args):
         buf += b'p'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
         buf += b'\0\0\0'
+    elif cmd == "random":
+        bif += b'r'
+        buf += b'\0\0\0\0'
     else:
         raise ValueError("O PIC não tem esse comando!")
 
@@ -135,6 +138,8 @@ if __name__ == "__main__":
         PICSend(PIC, "color", name_colors.index(sys.argv[2])+1)
     elif sys.argv[2] in name_preprogs:
         PICSend(PIC, "preprog", name_preprogs.index(sys.argv[2])+1)
+    elif sys.argv[2] == "aleatorio":
+        PICSend(PIC, "random")
     else:
         print("Não foi possível interpretar o comando", file=sys.stderr)
     PICEnd(PIC)

@@ -11,7 +11,6 @@ extern SoftwareSerial bt_serial;
 static unsigned int buf_lido[BUF_LIDO_T]; //buffer de entrada, guarda os inputs de bluetooth
 static int b_lido = 0; //a posicao no buffer que temos que ler ainda
 
-
 void ler_bt(void){
     //esse if e necessario se nao poderiamos estar tentando 
     //ler informacao que nao chegou ainda
@@ -48,6 +47,9 @@ void ler_bt(void){
         break;
     case 'p':
         desenhar_prepronto(buf_lido[1]);
+        break;
+    case 'r':
+        movimento_aleatorio();
         break;
     default:
         Serial.println("NAO TEM COMANDO!");

@@ -6,6 +6,8 @@
 
 extern Servo mec;
 
+static bool aleatorio_ativado = false;
+
 
 void desenhar_prepronto(int cmd){
     switch(cmd){
@@ -24,7 +26,7 @@ void desenhar_prepronto(int cmd){
     }
 }
 
-void desehar_linha(long x, long y){
+void desehar_linha(float x, float y){
     PRINTD("line: ");
     PRINTD(x);
     PRINTD(" ");
@@ -34,7 +36,7 @@ void desehar_linha(long x, long y){
     //ainda não! Veja no próximo episódio
 }
 
-void ir_para_pos(long x, long y){
+void ir_para_pos(float x, float y){
     PRINTD("goto: ");
     PRINTD(x);
     PRINTD(" ");
@@ -42,4 +44,14 @@ void ir_para_pos(long x, long y){
     PRINTD("\n");
 
     //ainda não também! Veja no próximo episódio
+}
+
+void movimento_aleatorio(void){
+    aleatorio_ativado ^= 1;
+
+    if(!aleatorio_ativado){
+        return
+    }
+
+    
 }
