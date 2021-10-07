@@ -50,7 +50,7 @@ void movimento_aleatorio(void){
     aleatorio_ativado ^= 1;
 
     if(!aleatorio_ativado){
-        return
+        return;
     }
 
     

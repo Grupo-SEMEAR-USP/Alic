@@ -35,12 +35,12 @@ void ler_bt(void){
     case 'g':
         x = (buf_lido[1] << 8) + buf_lido[2];
         y = (buf_lido[3] << 8) + buf_lido[4];
-        ir_para_pos(x/50, y/50);
+        ir_para_pos((float) x/50, (float) y/50);
         break;
     case 'l':
         x = (buf_lido[1] << 8) + buf_lido[2];
         y = (buf_lido[3] << 8) + buf_lido[4];
-        desehar_linha(x/50, y/50);
+        desehar_linha((float) x/50, (float) y/50);
         break;
     case 'c':
         mudar_cor(buf_lido[1]);
