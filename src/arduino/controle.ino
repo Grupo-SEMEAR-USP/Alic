@@ -91,7 +91,7 @@ void controle(void)
     }
 }
 
-void random_mov()
+void movimento_aleatorio()
 {
     int left_speed = initial_speed, right_speed = initial_speed;
     float curve = random(1);        //Novo parametro para redução de velocidade em curva... Gerado aleatoriamente para mudar o raio da carva
