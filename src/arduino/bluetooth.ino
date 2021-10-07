@@ -30,17 +30,17 @@ void ler_bt(void){
 
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
     b_lido = 0;
-    long x, y;
+    long r, th;
     switch(buf_lido[0]){
     case 'g':
-        x = (buf_lido[1] << 8) + buf_lido[2];
-        y = (buf_lido[3] << 8) + buf_lido[4];
-        ir_para_pos((float) x/50, (float) y/50);
+        r = (buf_lido[1] << 8) + buf_lido[2];
+        th = (buf_lido[3] << 8) + buf_lido[4];
+        ir_para_pos((float) r/50, (float) th/50);
         break;
     case 'l':
-        x = (buf_lido[1] << 8) + buf_lido[2];
-        y = (buf_lido[3] << 8) + buf_lido[4];
-        desehar_linha((float) x/50, (float) y/50);
+        r = (buf_lido[1] << 8) + buf_lido[2];
+        th = (buf_lido[3] << 8) + buf_lido[4];
+        desehar_linha((float) r/50, (float) th/50);
         break;
     case 'c':
         mudar_cor(buf_lido[1]);

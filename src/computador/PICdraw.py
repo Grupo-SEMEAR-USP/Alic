@@ -6,6 +6,7 @@ import struct
 import serial
 import sys
 import numpy as np
+import math as m
 
 from svgutils import parseSVG, Rectangle
 
@@ -34,10 +35,10 @@ def PICSend(PIC, cmd, *args):
     buf = bytes()
     if cmd == "goto":
         buf += b'g'
-        buf += bytearray(struct.pack(">HH", int(args[0]*50), int(args[1]*50))) 
+        buf += bytearray(struct.pack(">Hh", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "line":
         buf += b'l'
-        buf += bytearray(struct.pack(">HH", int(args[0]*50), int(args[1]*50))) 
+        buf += bytearray(struct.pack(">Hh", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "color":
         buf += b'c'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
@@ -59,10 +60,16 @@ def PICSend(PIC, cmd, *args):
     if flag_byte[0] != ord('2'):
         raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
 
+xnow = 0, ynow = 0
+def toDeltaPolar(x, y):
+    r = ((x - now)**2 + (y - ynow)**2)**(1/2)
+    th = m.atan(y/x)*180/m.pi
+    xnow, ynow = x, y
 
 #desenha uma linha
 def drawLine(PIC, x, y):
-    PICSend(PIC, "line", x, y)
+    r, th = toDeltaPolar(x, y)
+    PICSend(PIC, "line", r, th)
 
 #pega o index da cor correta para o PIC interpretar
 def getPicColor(rgb):
@@ -83,7 +90,8 @@ def setColor(PIC, rgbcolor):
 
 #sem desenhar no papel, vai para esse lugar
 def goTo(PIC, x, y):
-    PICSend(PIC, "goto", x, y)
+    r, th = toDeltaPolar(x, y)
+    PICSend(PIC, "goto", r, th)
 
 
 #desenha um caminho
