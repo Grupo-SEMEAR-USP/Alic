@@ -1,5 +1,4 @@
 #include <Servo.h> //Biblioteca para servomotores
-#include <Ultrasonic.h> //Biblioteca para o sensor ultrassonico
 #include <SoftwareSerial.h> //Biblioteca para a criação de interfaces seriais
 
 #include "pins.hpp"
@@ -11,9 +10,6 @@
 
 /*globais bluetooth*/
 SoftwareSerial bt_serial(BT_RX, BT_TX);
-
-/*globais controle*/
-Ultrasonic ultrasonic(SENSOR_FRENTE, SENSOR_FRENTE);
 
 /*globais cores*/
 Servo tambor;
