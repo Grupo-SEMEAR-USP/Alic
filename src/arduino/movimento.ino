@@ -6,8 +6,6 @@
 
 extern Servo mec;
 
-static bool aleatorio_ativado = false;
-
 
 void desenhar_prepronto(int cmd){
     switch(cmd){
@@ -44,14 +42,4 @@ void ir_para_pos(float x, float y){
     PRINTD("\n");
 
     //ainda não também! Veja no próximo episódio
-}
-
-void movimento_aleatorio(void){
-    aleatorio_ativado ^= 1;
-
-    if(!aleatorio_ativado){
-        return;
-    }
-
-    
 }

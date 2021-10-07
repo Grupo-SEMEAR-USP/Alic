@@ -11,7 +11,8 @@
 
 
 void pid(void);
-void leitura_ultra(void);
+void ultra_read(void);
 void controle(void);
+void movimento_aleatorio(void);
 
 #endif

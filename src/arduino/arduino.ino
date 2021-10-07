@@ -15,6 +15,9 @@ SoftwareSerial bt_serial(BT_RX, BT_TX);
 Servo tambor;
 Servo mec;
 
+Servo roda_esquerda;
+Servo roda_direita;
+
 
 /*funções*/
 void seguir_mao(void);
@@ -22,14 +25,14 @@ void seguir_mao(void);
 
 void seguir_mao(void){
     pid();
-    leitura_ultra();
+    ultra_read();
     controle();
 }
 
 void setup(){
     //inicialização dos motores de movimento
-    pinMode(RODA_ESQ_PIN, OUTPUT);
-    pinMode(RODA_DIR_PIN, OUTPUT);
+    roda_direita.attach(RODA_DIR_PIN);
+    roda_esquerda.attach(RODA_ESQ_PIN);
 
     //inicialização sensores infravermelhos
     pinMode(INFRA_ESQ, INPUT);

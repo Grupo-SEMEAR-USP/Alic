@@ -1,5 +1,11 @@
 #include <math.h>
+#include <Servo.h>
+
 #include "controle.hpp"
+
+
+extern Servo roda_esquerda;
+extern Servo roda_direita;
 
 /*Globais sensores ultrassonicos*/
 static float distance = 0;
@@ -13,8 +19,12 @@ static double err_sum = 0, last_err = 0, error = 0, d_err = 0; //Erros
 /*Globais motores*/
 static int initial_speed = 100;
 
-void pid(void)
-{
+/*Globais movimento aleatório*/
+static bool aleatorio_ativado = false;
+
+
+void pid(void){
+
     //Tempo entre esta e ultima medicao
     unsigned long now = millis();
     double time_change = (double)(now - last_time);
@@ -32,8 +42,8 @@ void pid(void)
     last_time = now;
 }
 
-long readUltrasonicDistance(int triggerPin, int echoPin)
-{
+long readUltrasonicDistance(int triggerPin, int echoPin){
+
     pinMode(triggerPin, OUTPUT); //Clear the trigger
     digitalWrite(triggerPin, LOW);
     delayMicroseconds(2);
@@ -46,14 +56,14 @@ long readUltrasonicDistance(int triggerPin, int echoPin)
     return pulseIn(echoPin, HIGH);
 }
 
-void ultra_read()
-{
+void ultra_read(void){
+
     //Le as informacoes do sensor em cm
-    distance = 0.01723 * readUltrasonicDistance(4, 4);
+    distance = 0.01723 * readUltrasonicDistance(SENSOR_FRENTE, SENSOR_FRENTE);
 }
 
-void controle(void)
-{
+void controle(void){
+
     //Alteracao nas velocidades
     int left_speed = initial_speed + output;
     int right_speed = initial_speed + output;
@@ -69,30 +79,35 @@ void controle(void)
 
     if (left < 100 && right < 100)
     {                                    //Dois sensores cobertos
-        RODA_DIR_PIN.write(right_speed); //Motor direito
-        RODA_ESQ_PIN.write(left_speed);  //Motor esquerdo
+        roda_direita.write(right_speed); //Motor direito
+        roda_esquerda.write(left_speed);  //Motor esquerdo
     }
     if (left < 100 && right > 100)
     { //Sensor esquerdo coberto
         left_speed = curve * left_speed;
-        RODA_DIR_PIN.write(right_speed); //Motor direito
-        RODA_ESQ_PIN.write(left_speed);  //Motor esquerdo
+        roda_direita.write(right_speed); //Motor direito
+        roda_esquerda.write(left_speed);  //Motor esquerdo
     }
     if (left > 100 && right < 100)
     { //Sensor direito coberto
         right_speed = curve * right_speed;
-        RODA_DIR_PIN.write(right_speed); //Motor direito
-        RODA_ESQ_PIN.write(left_speed);  //Motor esquerdo
+        roda_direita.write(right_speed); //Motor direito
+        roda_esquerda.write(left_speed);  //Motor esquerdo
     }
     if (left > 100 && right > 100)
     {                                    //Dois sensores cobertos
-        RODA_DIR_PIN.write(right_speed); //Motor direito
-        RODA_ESQ_PIN.write(left_speed);  //Motor esquerdo
+        roda_direita.write(right_speed); //Motor direito
+        roda_esquerda.write(left_speed);  //Motor esquerdo
     }
 }
 
-void movimento_aleatorio()
-{
+void movimento_aleatorio(void){
+
+    aleatorio_ativado ^= 1;
+    if(!aleatorio_ativado){
+        return;
+    }
+
     int left_speed = initial_speed, right_speed = initial_speed;
     float curve = random(1);        //Novo parametro para redução de velocidade em curva... Gerado aleatoriamente para mudar o raio da carva
     int random_time = random(1000); //Tempo entre uma manobra e outra
@@ -100,28 +115,26 @@ void movimento_aleatorio()
 
     int maneuver = random(10);
 
-    if (maneuver < 8) //Para que a chance de seguir reto seja maior
-    {
+    if (maneuver < 8){ //Para que a chance de seguir reto seja maior
         maneuver = 0;
     }
 
-    switch (maneuver)
-    {
+    switch (maneuver){
     case 0:                              //Continua reto
-        RODA_DIR_PIN.write(right_speed); //Motor direito
-        RODA_ESQ_PIN.write(left_speed);  //Motor esquerdo
+        roda_direita.write(right_speed); //Motor direito
+        roda_esquerda.write(left_speed);  //Motor esquerdo
         break;
 
     case 8:
         right_speed = round(curve * right_speed); //Vira para a direita
-        RODA_DIR_PIN.write(right_speed);          //Motor direito
-        RODA_ESQ_PIN.write(left_speed);           //Motor esquerdo
+        roda_direita.write(right_speed);          //Motor direito
+        roda_esquerda.write(left_speed);           //Motor esquerdo
         break;
 
     case 9:
         left_speed = round(curve * left_speed); //Vira para a esquerda
-        RODA_DIR_PIN.write(right_speed);        //Motor direito
-        RODA_ESQ_PIN.write(left_speed);         //Motor esquerdo
+        roda_direita.write(right_speed);        //Motor direito
+        roda_esquerda.write(left_speed);         //Motor esquerdo
         break;
 
     default:
@@ -130,5 +143,5 @@ void movimento_aleatorio()
 
     //Mas ainda e necessario verificar se ele nao vai sair da folha
     //Basta chamar a funcao de controle aqui (certo?)
-    control();
+    controle();
 }
