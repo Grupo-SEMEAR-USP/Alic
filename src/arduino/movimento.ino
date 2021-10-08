@@ -24,7 +24,7 @@ void desenhar_prepronto(int cmd){
     }
 }
 
-void desehar_linha(long x, long y){
+void desehar_linha(float x, float y){
     PRINTD("line: ");
     PRINTD(x);
     PRINTD(" ");
@@ -34,7 +34,7 @@ void desehar_linha(long x, long y){
     //ainda não! Veja no próximo episódio
 }
 
-void ir_para_pos(long x, long y){
+void ir_para_pos(float x, float y){
     PRINTD("goto: ");
     PRINTD(x);
     PRINTD(" ");

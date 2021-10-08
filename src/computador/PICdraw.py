@@ -6,6 +6,7 @@ import struct
 import serial
 import sys
 import numpy as np
+import math as m
 
 from svgutils import parseSVG, Rectangle
 
@@ -34,10 +35,10 @@ def PICSend(PIC, cmd, *args):
     buf = bytes()
     if cmd == "goto":
         buf += b'g'
-        buf += bytearray(struct.pack(">HH", int(args[0]*50), int(args[1]*50))) 
+        buf += bytearray(struct.pack(">Hh", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "line":
         buf += b'l'
-        buf += bytearray(struct.pack(">HH", int(args[0]*50), int(args[1]*50))) 
+        buf += bytearray(struct.pack(">Hh", int(args[0]*50), int(args[1]*50))) 
     elif cmd == "color":
         buf += b'c'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
@@ -46,6 +47,9 @@ def PICSend(PIC, cmd, *args):
         buf += b'p'
         buf += int(args[0]).to_bytes(length=1, byteorder="big")
         buf += b'\0\0\0'
+    elif cmd == "random":
+        bif += b'r'
+        buf += b'\0\0\0\0'
     else:
         raise ValueError("O PIC não tem esse comando!")
 
@@ -56,10 +60,16 @@ def PICSend(PIC, cmd, *args):
     if flag_byte[0] != ord('2'):
         raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
 
+xnow = 0, ynow = 0
+def toDeltaPolar(x, y):
+    r = ((x - now)**2 + (y - ynow)**2)**(1/2)
+    th = m.atan(y/x)*180/m.pi
+    xnow, ynow = x, y
 
 #desenha uma linha
 def drawLine(PIC, x, y):
-    PICSend(PIC, "line", x, y)
+    r, th = toDeltaPolar(x, y)
+    PICSend(PIC, "line", r, th)
 
 #pega o index da cor correta para o PIC interpretar
 def getPicColor(rgb):
@@ -80,7 +90,8 @@ def setColor(PIC, rgbcolor):
 
 #sem desenhar no papel, vai para esse lugar
 def goTo(PIC, x, y):
-    PICSend(PIC, "goto", x, y)
+    r, th = toDeltaPolar(x, y)
+    PICSend(PIC, "goto", r, th)
 
 
 #desenha um caminho
@@ -105,6 +116,8 @@ def drawPath(PIC, path, detail):
                 x, y = p.real, p.imag
                 drawLine(PIC, x, y)
 
+name_preprogs = ["casa", "estrela", "NRE"]
+name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -128,11 +141,13 @@ if __name__ == "__main__":
             setColor(PIC, color)
             #e desenha o caminho!
             drawPath(PIC, path, int(sys.argv[3]))
-    elif sys.argv[2] == "casa":
-        PICSend(PIC, "preprog", 1)
-    elif sys.argv[2] == "sol":
-        PICSend(PIC, "preprog", 2)
-    elif sys.argv[2] == "NRE":
-        PICSend(PIC, "preprog", 3)
-
+    
+    elif sys.argv[2] in name_colors:
+        PICSend(PIC, "color", name_colors.index(sys.argv[2])+1)
+    elif sys.argv[2] in name_preprogs:
+        PICSend(PIC, "preprog", name_preprogs.index(sys.argv[2])+1)
+    elif sys.argv[2] == "aleatorio":
+        PICSend(PIC, "random")
+    else:
+        print("Não foi possível interpretar o comando", file=sys.stderr)
     PICEnd(PIC)
