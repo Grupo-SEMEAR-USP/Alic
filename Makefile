@@ -11,6 +11,7 @@ INO_BUILDD  ?= $(BUILDD)/build
 
 SRC          = ./src
 ARDUINO_SRC  = $(SRC)/arduino
+INO_FILES    = $(wildcard $(ARDUINO_SRC)/*.ino)
 
 RES         ?= ./res
 
@@ -42,12 +43,6 @@ debug: $(HEX_FILE)
 
 flash:
 	cd $(INO_BUILDD)/$(BOARD)/ && avrdude -p $(CPU) -c arduino -U flash:w:$(OUT_FILE):i -F -P $(COM)
-
-pytest:
-	cd $(PY_SRC) && python $(PY_DRAW_NAME) $(COM) $(PWD)/$(PY_TEST_SVG) 10
-
-pyturtle:
-	cd $(PY_SRC) && python $(PY_TR_NAME) $(COM) $(PWD)/$(PY_TEST_SVG) 10
 
 
 $(HEX_FILE): $(INO_FILES)

@@ -4,8 +4,8 @@
 #include "pins.hpp"
 
 
-void desehar_linha(long x, long y);
-void ir_para_pos(long x, long y);
+void desehar_linha(float multL, float ang);
+void ir_para_pos(float multL, float ang);
 void desenhar_prepronto(int cmd);
 
 #endif
