@@ -4,6 +4,11 @@
 #include "controle.hpp"
 
 
+#define KP 1
+#define KI 0.001
+#define KD 0.005
+
+
 extern Servo roda_esquerda;
 extern Servo roda_direita;
 

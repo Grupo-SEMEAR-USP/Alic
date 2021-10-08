@@ -5,6 +5,10 @@
 #include "cores.hpp"
 #include "utils.hpp"
 
+#define MULT_BTLONG 50
+#define PROXIMO_COMANDO '2'
+#define BUF_LIDO_T 5
+
 
 extern SoftwareSerial bt_serial;
 
@@ -35,12 +39,12 @@ void ler_bt(void){
     case 'g':
         r = (buf_lido[1] << 8) + buf_lido[2];
         th = (buf_lido[3] << 8) + buf_lido[4];
-        ir_para_pos((float) r/50, (float) th/50);
+        ir_para_pos((float) r/MULT_BTLONG, (float) th/MULT_BTLONG);
         break;
     case 'l':
         r = (buf_lido[1] << 8) + buf_lido[2];
         th = (buf_lido[3] << 8) + buf_lido[4];
-        desehar_linha((float) r/50, (float) th/50);
+        desehar_linha((float) r/MULT_BTLONG, (float) th/MULT_BTLONG);
         break;
     case 'c':
         mudar_cor(buf_lido[1]);
