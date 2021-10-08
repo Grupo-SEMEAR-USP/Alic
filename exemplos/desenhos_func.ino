@@ -207,8 +207,8 @@ switch(desenho){
       rot_antihor(30, 3);
       rec;
       mec_down;
-      
-    }
+     }
+     
     }
 
     //fazer telhado da casa
@@ -220,7 +220,7 @@ switch(desenho){
       frente(1);
       mec_up;
       pos_eixo_frente;
-    }
+     }
 
    break;
 
@@ -312,7 +312,7 @@ switch(desenho){
     mec_up;
     frente(1/2);
 
-
+    }
 
 
     //função genérica que recebe ângulo e multiplo de L e anda
@@ -325,7 +325,7 @@ switch(desenho){
         frente(multL);
         mec_up;
         pos_eixo_frente;
-      }
+        }
 
       if(mult_ang<0){
         mult_ang=-mult_ang;
@@ -335,8 +335,8 @@ switch(desenho){
         frente(multL);
         mec_up;
         pos_eixo_frente;
-      }
-    }
+        }
+     }
 
 
     void andar(float ang, float multL){
@@ -346,22 +346,20 @@ switch(desenho){
       if (mult_ang>0){
         rot_hor(30, mult_ang);
         frente(multL);
-      }
+        }
 
       if(mult_ang<0){
         mult_ang=-mult_ang;
         rot_antihor(30, mult_ang);
         frente(multL);
-      }
+        }
       
     }
 
 
-
-
+}
 
 
 
 
    
-  }
