@@ -121,7 +121,7 @@ void desenhar_estrela(void){
         frente(1);
         mec_up();
         pos_eixo_frente();
-        rot_hor(36, 4);
+        rot_hor(30, 4.8);
         rec();
 
         if(i != 4){
@@ -131,8 +131,78 @@ void desenhar_estrela(void){
 }
 
 void desenhar_casa(void){
-    ;
-}
+    for(i=0; i<4; i++){
+    
+       if(i!=1){
+          frente(1);
+          mec_up;
+          pos_eixo_frente;
+          rot_antihor(30, 3);
+          rec;
+              if(i!=4){
+                  mec_down;
+              }
+         }
+
+      if(i==1){
+      //vamos desenhar a portinha, que tem 5 linhas
+      
+        //linha 1
+        frente(1/3);
+        mec_up;
+        pos_eixo_frente;
+        rot_antihor(30, 3);
+        rec;
+        mec_down;
+
+        //linha 2
+        frente(1/3);
+        mec_up;
+        pos_eixo_frente;
+        rot_hor(30, 3);
+        rec;
+        mec_down;
+
+        //linha 3;
+        frente(1/3);
+        mec_up;
+        pos_eixo_frente;
+        rot_hor(30,3);
+        rec;
+        mec_down;
+
+        //linha 4;
+        frente(1/3);
+        mec_up;
+        pos_eixo_frente;
+        rot_antihor(30, 3);
+        rec;
+        mec_down;
+
+        //linha 5
+        frente(1/3);
+        mec_up;
+        pos_eixo_frente;
+        rot_antihor(30, 3);
+        rec;
+        mec_down;
+        
+       }
+     
+      } //terminando de desenhar a base, vamos ao telhado
+
+    //fazer telhado da casa
+    for(i=0; i<2; i++){
+        pos_eixo_frente;
+        rot_hor(30,4);
+        rec;
+        mec_down;
+        frente(1);
+        mec_up;
+        pos_eixo_frente;
+     }
+    
+} //desenho finalizado
 
 void desenhar_nre(void){
     //desenhando o N
