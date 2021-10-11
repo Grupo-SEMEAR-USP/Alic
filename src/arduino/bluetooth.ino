@@ -1,4 +1,5 @@
 #include <SoftwareSerial.h>
+#include <inttypes.h>
 
 #include "bluetooth.hpp"
 #include "movimento.hpp"
@@ -34,7 +35,8 @@ void ler_bt(void){
 
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
     b_lido = 0;
-    long r, th;
+    uint16_t r;
+    int16_t th;
     switch(buf_lido[0]){
     case 'g':
         r = (buf_lido[1] << 8) + buf_lido[2];
