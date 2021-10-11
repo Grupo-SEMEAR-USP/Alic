@@ -56,7 +56,6 @@ def PICSend(PIC, cmd, *args):
     #o primeiro comando escreve incondicionalmente, depois vê quando pode mandar o próximo
     PIC.write(buf)
     print(f'{cmd}: ', *args)
-    flag_byte = PIC.read(size=1)
     if flag_byte[0] != ord('2'):
         raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
 
@@ -161,7 +160,7 @@ def PICmain(PIC):
         elif args[0] in name_colors:
             PICSend(PIC, "color", name_colors.index(args[0])+1)
         elif args[0] in name_preprogs:
-            PICSend(PIC, "preprog", name_preprog.index(args[0])+1)
+            PICSend(PIC, "preprog", name_preprogs.index(args[0])+1)
         elif args[0] == "goto":
             goTo(PIC, int(args[1]), int(args[2]))
         elif args[0] == "linha":

@@ -3,15 +3,15 @@
 #include "movimento.hpp"
 #include "utils.hpp"
 
-#define t30 1600
-#define t36 2000
-#define t45 2400
-#define sec 1000
+#define t30 160
+#define t36 200
+#define t45 240
+#define sec 100
 #define hor 80
 #define antihor 100
 #define st 90
-#define line 3000
-#define recuo 1000
+#define line 30
+#define recuo 100
 #define ang_mec 45
 
 extern Servo mec;
@@ -32,90 +32,88 @@ void desenhar_nre(void);
 
 
 void frente(float a){
-  roda_direita.write(hor); //ir pra frente
-  roda_esquerda.write(antihor);
-  delay(a*line);
-  roda_direita.write(st);
-  roda_esquerda.write(st);
-  delay(2000);
+    roda_direita.write(hor); //ir pra frente
+    roda_esquerda.write(antihor);
+    delay(a*line);
+    roda_direita.write(st);
+    roda_esquerda.write(st);
+    delay(200);
 }
 
 void mec_up(void){
-  mec.write(0); //levanta canetinha
-  delay(1000);
+    mec.write(0); //levanta canetinha
+    delay(100);
 }
 
 void mec_down(void){
-  mec.write(ang_mec); //levanta canetinha
-  delay(1000);
+    mec.write(ang_mec); //levanta canetinha
+    delay(100);
 }
 
 void pos_eixo_frente(void){
-  roda_direita.write(hor); //posicionar eixo 
-  roda_esquerda.write(antihor);
-  delay(recuo);
-  roda_direita.write(st);
-  roda_esquerda.write(st);
-  delay(2000);
+    roda_direita.write(hor); //posicionar eixo 
+    roda_esquerda.write(antihor);
+    delay(recuo);
+    roda_direita.write(st);
+    roda_esquerda.write(st);
+    delay(200);
 }
 
 void rec(void){
-  roda_direita.write(antihor); //recuo
-  roda_esquerda.write(hor);
-  delay(recuo);
-  roda_direita.write(st);
-  roda_esquerda.write(st);
-  delay(2000);
+    roda_direita.write(antihor); //recuo
+    roda_esquerda.write(hor);
+    delay(recuo);
+    roda_direita.write(st);
+    roda_esquerda.write(st);
+    delay(200);
 }
 
 void rot_hor(int num, float mult){
   
-  switch(num){
+    switch(num){
 
-    case 30:
-    roda_direita.write(antihor); //rotacionar
-    roda_esquerda.write(antihor);
-    delay(mult*(t30));
-    roda_direita.write(st);
-    roda_esquerda.write(st);
-    delay(2*sec);
-    break;
+        case 30:
+        roda_direita.write(antihor); //rotacionar
+        roda_esquerda.write(antihor);
+        delay(mult*(t30));
+        roda_direita.write(st);
+        roda_esquerda.write(st);
+        delay(2*sec);
+        break;
 
-    case 45:
-    roda_direita.write(antihor); //rotacionar
-    roda_esquerda.write(antihor);
-    delay(mult*(t45));
-    roda_direita.write(st);
-    roda_esquerda.write(st);
-    delay(2*sec);
-    break;
+        case 45:
+        roda_direita.write(antihor); //rotacionar
+        roda_esquerda.write(antihor);
+        delay(mult*(t45));
+        roda_direita.write(st);
+        roda_esquerda.write(st);
+        delay(2*sec);
+        break;
 
-  }
+    }
 }
 
 void rot_antihor(int num, float mult){
-  
-  switch(num){
+    switch(num){
+        case 30:
+        roda_direita.write(hor); //rotacionar
+        roda_esquerda.write(hor);
+        delay(mult*(t30));
+        roda_direita.write(st);
+        roda_esquerda.write(st);
+        delay(2*sec);
+        break;
 
-    case 30:
-    roda_direita.write(hor); //rotacionar
-    roda_esquerda.write(hor);
-    delay(mult*(t30));
-    roda_direita.write(st);
-    roda_esquerda.write(st);
-    delay(2*sec);
-    break;
-
-    case 45:
-    roda_direita.write(hor); //rotacionar
-    roda_esquerda.write(hor);
-    delay(mult*(t45));
-    roda_direita.write(st);
-    roda_esquerda.write(st);
-    delay(2*sec);
-    break;
-    
-  }
+        case 45:
+        roda_direita.write(hor); //rotacionar
+        roda_esquerda.write(hor);
+        delay(mult*(t45));
+        roda_direita.write(st);
+        roda_esquerda.write(st);
+        delay(2*sec);
+        break;
+      
+    }
 }
 
 void desenhar_estrela(void){
@@ -255,13 +253,12 @@ void desehar_linha(float multL, float ang){
 
     float mult_ang=ang/30;
 
-    if(mult_ang != 0){
-        if(mult_ang > 0){
-            rot_hor(30, mult_ang);
-        }
-        else{
-            rot_antihor(30, -mult_ang);
-        }
+    if (mult_ang > 0){
+        rot_hor(30, mult_ang);
+        rec();
+    }
+    else if(mult_ang < 0){
+        rot_antihor(30, -mult_ang);
         rec();
     }
     
