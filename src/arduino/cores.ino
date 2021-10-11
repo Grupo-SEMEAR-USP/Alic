@@ -23,7 +23,7 @@ void mudar_cor(int nova_cor){
 
     switch(nova_cor){
 
-        case 0: //cor amarela no 45
+        case 0: //cor cinza
         if(cor_atual!=0){
             mec.write(0);
             delay(TEMPO_ESP);
@@ -39,7 +39,7 @@ void mudar_cor(int nova_cor){
         mec.write(ANG_MEC);
         break;
     
-    case 1: //cor amarela no 45
+    case 1: //cor preto
         if(cor_atual!=1){
             mec.write(0);
             delay(TEMPO_ESP);
@@ -59,7 +59,7 @@ void mudar_cor(int nova_cor){
         mec.write(ANG_MEC);
         break;
 
-    case 2: //cor azul
+    case 2: //cor vermelha
         if(cor_atual!=2){
             mec.write(0);
             delay(TEMPO_ESP);
@@ -79,7 +79,7 @@ void mudar_cor(int nova_cor){
         mec.write(ANG_MEC);
         break;
 
-    case 3: //cor verde
+    case 3: //cor azul
         if(cor_atual!=3){
             mec.write(0);
             delay(TEMPO_ESP);
@@ -121,7 +121,7 @@ void mudar_cor(int nova_cor){
       
         break;
 
-        case 5: //cor verde
+        case 5: //cor amarela
         if(cor_atual!=5){
             mec.write(0);
             delay(TEMPO_ESP);
@@ -142,7 +142,7 @@ void mudar_cor(int nova_cor){
       
         break;
 
-        case 6: //cor verde
+        case 6: //cor rosa
         if(cor_atual!=6){
             mec.write(0);
             delay(TEMPO_ESP);
@@ -163,7 +163,7 @@ void mudar_cor(int nova_cor){
       
         break;
 
-        case 7: //cor verde
+        case 7: //cor anil
         if(cor_atual!=7){
             mec.write(0);
             delay(TEMPO_ESP);
