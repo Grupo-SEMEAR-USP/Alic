@@ -60,11 +60,30 @@ def PICSend(PIC, cmd, *args):
     if flag_byte[0] != ord('2'):
         raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
 
-xnow = 0, ynow = 0
+
+xnow, ynow = 0, 0
+thnow = 0
 def toDeltaPolar(x, y):
-    r = ((x - now)**2 + (y - ynow)**2)**(1/2)
-    th = m.atan(y/x)*180/m.pi
+    global xnow, ynow, thnow
+
+    dx, dy = x-xnow, y-ynow
+
+    r = (dx**2 + dy**2)**(1/2)
+    
+    try:
+        th = m.atan(dy/dx)*180/m.pi
+        if dx <= 0:
+            th += 180
+    except ZeroDivisionError:
+        th = 90 if dy >= 0 else -90
+    
+
+    thmove = th - thnow
+    thmove = ((thmove+180) %360) - 180
+
     xnow, ynow = x, y
+    thnow = th
+    return r, thmove
 
 #desenha uma linha
 def drawLine(PIC, x, y):
@@ -98,14 +117,14 @@ def goTo(PIC, x, y):
 def drawPath(PIC, path, detail):
     for e in path: #para cada elemento no caminho (curva, linha, etc)
         if isinstance(e, Move):
-            goTo(PIC, e.start.real, e.start.imag)
+            goTo(PIC, e.start.real, -e.start.imag)
         elif isinstance(e, Line) or isinstance(e, Close):
-            drawLine(PIC, e.end.real, e.end.imag)
+            drawLine(PIC, e.end.real, -e.end.imag)
         elif isinstance(e, Rectangle):
-            drawLine(PIC, e.start.real+e.width, e.start.imag)
-            drawLine(PIC, e.start.real+e.width, e.start.imag+e.height)
-            drawLine(PIC, e.start.real, e.start.imag+e.height)
-            drawLine(PIC, e.start.real, e.start.imag)
+            drawLine(PIC, e.start.real+e.width, -e.start.imag)
+            drawLine(PIC, e.start.real+e.width, -(e.start.imag+e.height))
+            drawLine(PIC, e.start.real, -(e.start.imag+e.height))
+            drawLine(PIC, e.start.real, -(e.start.imag))
             
         #o módulo svg.path tem a útil função que pega um parâmetro t de zero a um e
         #retorna um ponto na curva, sendo que em t=0 é o início da curva e t=1 é o final
@@ -114,40 +133,52 @@ def drawPath(PIC, path, detail):
             for t in range(0, detail+1):
                 p = e.point(t/detail)
                 x, y = p.real, p.imag
-                drawLine(PIC, x, y)
+                drawLine(PIC, x, -y)
 
 name_preprogs = ["casa", "estrela", "NRE"]
 name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
 
+
+def PICmain(PIC): 
+    while True:
+        args = input("comando: ").split()
+
+        if not args:
+            break
+    
+        #se o comando for um arquivo svg, lê e desenha ele
+        if args[0][-4:] == ".svg" and len(args) == 2:
+            #le o svg
+            w, h, paths, colors = parseSVG(args[0])
+
+            #desenha todos os caminhos do arquivo
+            for path, color in zip(paths, colors):
+                #coloca a cor correta
+                setColor(PIC, color)
+                #e desenha o caminho!
+                drawPath(PIC, path, int(args[1]))
+
+        elif args[0] in name_colors:
+            PICSend(PIC, "color", name_colors.index(args[0])+1)
+        elif args[0] in name_preprogs:
+            PICSend(PIC, "preprog", name_preprog.index(args[0])+1)
+        elif args[0] == "goto":
+            goTo(PIC, int(args[1]), int(args[2]))
+        elif args[0] == "linha":
+            drawLine(PIC, int(args[1]), int(args[2]))
+        elif args[0] == "aleatorio":
+            PICSend(PIC, "random")
+        else:
+            print("Não foi possível interpretar o comando", file=sys.stderr)
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print(
-        f"Erro! use: {sys.argv[0]} COM_port comando", 
+        f"Erro! use: {sys.argv[0]} COM_port", 
         file=sys.stderr)
         sys.exit(-1)
 
-    #inicializa o PIC :)
     PIC = PICInit(sys.argv[1])
-
-    #se o comando for um arquivo svg, lê e desenha ele
-    if sys.argv[2][:-4] == ".svg" and len(sys.argv == 4):
-
-        #le o svg
-        w, h, paths, colors = parseSVG(sys.argv[2])
-
-        #desenha todos os caminhos do arquivo
-        for path, color in zip(paths, colors):
-            #coloca a cor correta
-            setColor(PIC, color)
-            #e desenha o caminho!
-            drawPath(PIC, path, int(sys.argv[3]))
-    
-    elif sys.argv[2] in name_colors:
-        PICSend(PIC, "color", name_colors.index(sys.argv[2])+1)
-    elif sys.argv[2] in name_preprogs:
-        PICSend(PIC, "preprog", name_preprogs.index(sys.argv[2])+1)
-    elif sys.argv[2] == "aleatorio":
-        PICSend(PIC, "random")
-    else:
-        print("Não foi possível interpretar o comando", file=sys.stderr)
+    PICmain(PIC)
     PICEnd(PIC)

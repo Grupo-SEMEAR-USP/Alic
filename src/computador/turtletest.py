@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #módulos necessários: turtle e os de draw.py
 
-from PICdraw import drawPath, PICEnd, setColor, pic_colors
+import PICdraw
 from svgutils import parseSVG
 import turtle as tr
 import struct
@@ -14,25 +14,25 @@ class FakePic:
         self.tur = tr.Turtle()
         self.data_transferred = 0
         m = max(w, h)
-        #o setworldcoordinates está com y invertido
-        #já que SVGs tem o sistema de coordenadas de tela e não carteziano
-        self.tur.screen.setworldcoordinates(0, m, m, 0)
+        self.tur.screen.setworldcoordinates(-m/2, -m/2, m/2, m/2)
 
     #sempre pronto para ler mais informação
     def read(self, **kargs):
         return b'2'
 
     def write(self, buf):
-        if(buf[0] == ord('c')):
-            self.tur.color(pic_colors[buf[1]-1])
-        elif(buf[0] == ord('g')):
+        if buf[0] == ord('c'):
+            self.tur.color(PICdraw.pic_colors[buf[1]-1])
+        elif buf[0] == ord('g'):
             self.tur.up()
-            x, y = struct.unpack(">HH", buf[1:5])
-            self.tur.goto(x/50, y/50)
+            r, th = struct.unpack(">Hh", buf[1:5])
+            self.tur.left(th/50)
+            self.tur.forward(r/50)
             self.tur.down()
-        elif(buf[0] == ord('l')):
-            x, y = struct.unpack(">HH", buf[1:5])
-            self.tur.goto(x/50, y/50)
+        elif buf[0] == ord('l'):
+            r, th = struct.unpack(">Hh", buf[1:5])
+            self.tur.left(th/50)
+            self.tur.forward(r/50)
         else:
             raise ValueError("PIC does not have the command sent")
         
@@ -41,29 +41,10 @@ class FakePic:
     def close(self):
         print(self.data_transferred)
         self.tur.hideturtle()
-        self.tur.screen.mainloop()
-
-def PICInit(com, w, h):
-    return FakePic(w, h)
 
 
 #não dá pra se usar a main de draw.py se não o PICInit() usado seria o do outro arquivo
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print(f"Erro! use: {sys.argv[0]} COM_port arquivo.svg detalhe_no_caminho(>=1)", file=sys.stderr)
-        sys.exit(-1)
-
-    #le o svg
-    w, h, paths, colors = parseSVG(sys.argv[2])
-
     #inicializa o PIC :)
-    PIC = PICInit(sys.argv[1], w, h)
-
-    #desenha todos os caminhos do arquivo
-    for path, color in zip(paths, colors):
-        #coloca a cor correta
-        setColor(PIC, color)
-        #e desenha o caminho!
-        drawPath(PIC, path, int(sys.argv[3]))
-
-    PICEnd(PIC)
+    PIC = FakePic(500, 500)
+    PICdraw.PICmain(PIC)
