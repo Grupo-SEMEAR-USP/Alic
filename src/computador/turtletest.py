@@ -34,7 +34,7 @@ class FakePic:
             self.tur.left(th/50)
             self.tur.forward(r/50)
         else:
-            raise ValueError("PIC does not have the command sent")
+            raise ValueError("FakePIC não tem o comando mandado!")
         
         self.data_transferred += 5
 
@@ -43,7 +43,6 @@ class FakePic:
         self.tur.hideturtle()
 
 
-#não dá pra se usar a main de draw.py se não o PICInit() usado seria o do outro arquivo
 if __name__ == "__main__":
     #inicializa o PIC :)
     PIC = FakePic(500, 500)

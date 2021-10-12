@@ -55,6 +55,7 @@ def PICSend(PIC, cmd, *args):
 
     #o primeiro comando escreve incondicionalmente, depois vê quando pode mandar o próximo
     PIC.write(buf)
+    flag_byte = PIC.read(size=1)
     print(f'{cmd}: ', *args)
     if flag_byte[0] != ord('2'):
         raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
