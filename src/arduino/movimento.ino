@@ -24,8 +24,7 @@ void mec_up(void);
 void mec_down(void);
 void pos_eixo_frente(void);
 void rec(void);
-void rot_hor(int num, float mult);
-void rot_antihor(int num, float mult);
+void rotacionar(int num, float mult, bool horario);
 void desenhar_estrela(void);
 void desenhar_casa(void);
 void desenhar_nre(void);
@@ -68,52 +67,32 @@ void rec(void){
     delay(200);
 }
 
-void rot_hor(int num, float mult){
-  
+void rotacionar(int num, float mult, bool horario){
+    
+    long tempo_delay;
+    long rodas_write_val = (horario)? hor : antihor;
+
     switch(num){
-
-        case 30:
-        roda_direita.write(antihor); //rotacionar
-        roda_esquerda.write(antihor);
-        delay(mult*(t30));
-        roda_direita.write(st);
-        roda_esquerda.write(st);
-        delay(2*sec);
+    case 30:
+        tempo_delay = mult*(t30);
         break;
-
-        case 45:
-        roda_direita.write(antihor); //rotacionar
-        roda_esquerda.write(antihor);
-        delay(mult*(t45));
-        roda_direita.write(st);
-        roda_esquerda.write(st);
-        delay(2*sec);
+    case 36:
+        tempo_delay = mult*(t36);
         break;
-
+    case 45:
+        tempo_delay = mult*(t45);
+        break;
+    default:
+        tempo_delay = 0;
+        break;
     }
-}
 
-void rot_antihor(int num, float mult){
-    switch(num){
-        case 30:
-        roda_direita.write(hor); //rotacionar
-        roda_esquerda.write(hor);
-        delay(mult*(t30));
-        roda_direita.write(st);
-        roda_esquerda.write(st);
-        delay(2*sec);
-        break;
-
-        case 45:
-        roda_direita.write(hor); //rotacionar
-        roda_esquerda.write(hor);
-        delay(mult*(t45));
-        roda_direita.write(st);
-        roda_esquerda.write(st);
-        delay(2*sec);
-        break;
-      
-    }
+    roda_direita.write(antihor); //rotacionar
+    roda_esquerda.write(antihor);
+    delay(rodas_write_val);
+    roda_direita.write(st);
+    roda_esquerda.write(st);
+    delay(2*sec);
 }
 
 void desenhar_estrela(void){
@@ -121,7 +100,7 @@ void desenhar_estrela(void){
         frente(1);
         mec_up();
         pos_eixo_frente();
-        rot_hor(30, 4.8);
+        rotacionar(30, 4.8, true);
         rec();
 
         if(i != 4){
@@ -131,76 +110,73 @@ void desenhar_estrela(void){
 }
 
 void desenhar_casa(void){
-    for(i=0; i<4; i++){
-    
-       if(i!=1){
-          frente(1);
-          mec_up;
-          pos_eixo_frente;
-          rot_antihor(30, 3);
-          rec;
-              if(i!=4){
-                  mec_down;
-              }
-         }
+    for(int i = 0; i < 4; i++){
+        if(i!=1){
+            frente(1);
+            mec_up();
+            pos_eixo_frente();
+            rotacionar(30, 3, false);
+            rec();
+            if(i!=4){
+                mec_down();
+            }
+        }
 
-      if(i==1){
-      //vamos desenhar a portinha, que tem 5 linhas
+        if(i==1){
+        //vamos desenhar a portinha, que tem 5 linhas
       
-        //linha 1
-        frente(1/3);
-        mec_up;
-        pos_eixo_frente;
-        rot_antihor(30, 3);
-        rec;
-        mec_down;
+            //linha 1
+            frente(1/3);
+            mec_up();
+            pos_eixo_frente();
+            rotacionar(30, 3, false);
+            rec();
+            mec_down();
 
-        //linha 2
-        frente(1/3);
-        mec_up;
-        pos_eixo_frente;
-        rot_hor(30, 3);
-        rec;
-        mec_down;
+            //linha 2
+            frente(1/3);
+            mec_up();
+            pos_eixo_frente();
+            rotacionar(30, 3, true);
+            rec();
+            mec_down();
 
-        //linha 3;
-        frente(1/3);
-        mec_up;
-        pos_eixo_frente;
-        rot_hor(30,3);
-        rec;
-        mec_down;
+            //linha 3;
+            frente(1/3);
+            mec_up();
+            pos_eixo_frente();
+            rotacionar(30, 3, true);
+            rec();
+            mec_down();
 
-        //linha 4;
-        frente(1/3);
-        mec_up;
-        pos_eixo_frente;
-        rot_antihor(30, 3);
-        rec;
-        mec_down;
+            //linha 4;
+            frente(1/3);
+            mec_up();
+            pos_eixo_frente();
+            rotacionar(30, 3, false);
+            rec();
+            mec_down();
 
-        //linha 5
-        frente(1/3);
-        mec_up;
-        pos_eixo_frente;
-        rot_antihor(30, 3);
-        rec;
-        mec_down;
-        
-       }
-     
-      } //terminando de desenhar a base, vamos ao telhado
+            //linha 5
+            frente(1/3);
+            mec_up();
+            pos_eixo_frente();
+            rotacionar(30, 3, false);
+            rec();
+            mec_down();
+        }
+    } //terminando de desenhar a base, vamos ao telhado
 
     //fazer telhado da casa
-    for(i=0; i<2; i++){
-        pos_eixo_frente;
-        rot_hor(30,4);
-        rec;
-        mec_down;
+    for(int i = 0; i < 2; i++){
+        pos_eixo_frente();
+        rotacionar(30, 4, true);
+        rec();
+        mec_down();
         frente(1);
-        mec_up;
-        pos_eixo_frente;
-     }
+        mec_up();
+        pos_eixo_frente();
+    }
     
 } //desenho finalizado
 
@@ -209,47 +185,47 @@ void desenhar_nre(void){
     frente(1);
     mec_up();
     pos_eixo_frente();
-    rot_hor(45, 3);
+    rotacionar(45, 3, true);
     rec();
     mec_down();
 
     frente(1.41);
     mec_up();
     pos_eixo_frente();
-    rot_antihor(45, 3);
+    rotacionar(45, 3, false);
     rec(); 
     mec_down();
 
     frente(1);
     mec_up();
     pos_eixo_frente();
-    rot_hor(45, 2);
+    rotacionar(45, 2, true);
 
     //desenhando o R
     frente(1);
-    rot_hor(45, 2);
+    rotacionar(45, 2, true);
     rec();
     mec_down();
     frente(1);
     mec_up();
     pos_eixo_frente();
-    rot_antihor(45, 2);
+    rotacionar(45, 2, false);
     frente(1/2);
-    rot_antihor(45, 3);
+    rotacionar(45, 3, false);
     rec();
 
     mec_down();
     frente(0.7);
     mec_up();
     pos_eixo_frente();
-    rot_hor(45, 2);
+    rotacionar(45, 2, true);
     rec();
 
     mec_down();
     frente(0.7);
     mec_up();
     pos_eixo_frente();
-    rot_antihor(45, 3);
+    rotacionar(45, 3, false);
     rec();
     mec_down();
     frente(1/2);
@@ -257,34 +233,34 @@ void desenhar_nre(void){
 
     //desenhando o E
     pos_eixo_frente();
-    rot_antihor(45, 4);
+    rotacionar(45, 4, false);
     frente(1);
-    rot_hor(45, 2);
+    rotacionar(45, 2, true);
     rec();
     mec_down();
     frente(1);
     mec_up();
 
     pos_eixo_frente();
-    rot_antihor(45, 2);
+    rotacionar(45, 2, false);
     rec();
     mec_down();
     frente(1/2);
     mec_up();
 
     pos_eixo_frente();
-    rot_antihor(45, 2);
+    rotacionar(45, 2, false);
     frente(1/2);
-    rot_antihor(45, 2);
+    rotacionar(45, 2, false);
     rec();
     mec_down();
     frente(1/2);
     mec_up();
 
     pos_eixo_frente();
-    rot_antihor(45, 2);
+    rotacionar(45, 2, false);
     frente(1/2);
-    rot_hor(45, 2);
+    rotacionar(45, 2, true);
     rec();
     mec_down();
     frente(1/2);
@@ -323,12 +299,12 @@ void desehar_linha(float multL, float ang){
 
     float mult_ang=ang/30;
 
-    if (mult_ang > 0){
-        rot_hor(30, mult_ang);
+    if(mult_ang > 0){
+        rotacionar(30, mult_ang, false);
         rec();
     }
     else if(mult_ang < 0){
-        rot_antihor(30, -mult_ang);
+        rotacionar(30, -mult_ang, true);
         rec();
     }
     
@@ -348,11 +324,11 @@ void ir_para_pos(float multL, float ang){
 
     float mult_ang=ang/30;
       
-    if (mult_ang > 0){
-        rot_hor(30, mult_ang);
+    if(mult_ang > 0){
+        rotacionar(30, mult_ang, false);
     }
     else if(mult_ang < 0){
-        rot_antihor(30, -mult_ang);
+        rotacionar(30, -mult_ang, true);
     }
 
     frente(multL);    
