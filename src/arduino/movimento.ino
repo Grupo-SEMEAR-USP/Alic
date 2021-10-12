@@ -131,7 +131,7 @@ void desenhar_estrela(void){
 }
 
 void desenhar_casa(void){
-    for(i=0; i<4; i++){
+    for(int i=0; i<4; i++){
     
        if(i!=1){
           frente(1);
@@ -192,7 +192,7 @@ void desenhar_casa(void){
       } //terminando de desenhar a base, vamos ao telhado
 
     //fazer telhado da casa
-    for(i=0; i<2; i++){
+    for(int i=0; i<2; i++){
         pos_eixo_frente;
         rot_hor(30,4);
         rec;
