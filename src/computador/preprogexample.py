@@ -2,9 +2,11 @@
 import turtle as tr
 import sys
 import math as m
+import time
 
 def init_prepronto(x, y):
     tr.hideturtle()
+    time.sleep(2)
     tr.up()
     tr.goto(x, y)
     tr.down()
