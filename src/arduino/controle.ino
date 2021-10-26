@@ -83,24 +83,24 @@ void controle(void){
     if (left < 100 && right < 100)
     {                                    //Dois sensores cobertos
         roda_direita.write(right_speed); //Motor direito
-        roda_esquerda.write(left_speed);  //Motor esquerdo
+        roda_esquerda.write(left_speed); //Motor esquerdo
     }
     if (left < 100 && right > 100)
-    { //Sensor esquerdo coberto
+    {                                    //Sensor esquerdo coberto
         left_speed = curve * left_speed;
         roda_direita.write(right_speed); //Motor direito
-        roda_esquerda.write(left_speed);  //Motor esquerdo
+        roda_esquerda.write(left_speed); //Motor esquerdo
     }
     if (left > 100 && right < 100)
-    { //Sensor direito coberto
+    {                                    //Sensor direito coberto
         right_speed = curve * right_speed;
         roda_direita.write(right_speed); //Motor direito
-        roda_esquerda.write(left_speed);  //Motor esquerdo
+        roda_esquerda.write(left_speed); //Motor esquerdo
     }
     if (left > 100 && right > 100)
-    {                                    //Dois sensores cobertos
+    {                                    //Dois sensores descobertos
         roda_direita.write(right_speed); //Motor direito
-        roda_esquerda.write(left_speed);  //Motor esquerdo
+        roda_esquerda.write(left_speed); //Motor esquerdo
     }
 }
 
@@ -112,7 +112,7 @@ void movimento_aleatorio(void){
     }
 
     int left_speed = initial_speed, right_speed = initial_speed;
-    float curve = random(1);        //Novo parametro para redução de velocidade em curva... Gerado aleatoriamente para mudar o raio da carva
+    float curve = random(1);        //Novo parametro para redução de velocidade em curva... Gerado aleatoriamente para mudar o raio da curva
     int random_time = random(1000); //Tempo entre uma manobra e outra
     delay(random_time);
 
