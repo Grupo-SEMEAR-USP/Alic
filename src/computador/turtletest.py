@@ -2,7 +2,6 @@
 #módulos necessários: turtle e os de draw.py
 
 import PICdraw
-from svgutils import parseSVG
 import turtle as tr
 import struct
 import sys

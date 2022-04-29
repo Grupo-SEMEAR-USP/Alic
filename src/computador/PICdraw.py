@@ -8,7 +8,7 @@ import sys
 import numpy as np
 import math as m
 
-from svgutils import parseSVG, Rectangle
+from svgutils import SVG, Rectangle
 
 #cores: branco, preto, vermelho, verde, azul escuro, amarelo, roxo, azul bebê
 pic_colors = np.array([
@@ -149,10 +149,12 @@ def PICmain(PIC):
         #se o comando for um arquivo svg, lê e desenha ele
         if args[0][-4:] == ".svg" and len(args) == 2:
             #le o svg
-            w, h, paths, colors = parseSVG(args[0])
+            svg = SVG(args[0])
+            w, h = svg.viewbox
+            paths = svg.paths
 
             #desenha todos os caminhos do arquivo
-            for path, color in zip(paths, colors):
+            for path, color in paths:
                 #coloca a cor correta
                 setColor(PIC, color)
                 #e desenha o caminho!

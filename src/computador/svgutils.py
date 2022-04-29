@@ -75,63 +75,72 @@ def readColor(e_xml):
 
     return rgb
 
-#pega o arquivo de svg e retorna o tamanho, caminhos e cores dele
-def parseSVG(filename):
-    #le o arquivo
-    doc = minidom.parse(filename)
-
-    #leitura de metadata
-    metadata = doc.getElementsByTagName('svg')[0]
-    wattribute = metadata.getAttribute('width')
-    hattribute = metadata.getAttribute('height')
+class SVG():
+    def __init__(self, svg_filename):
+        doc = minidom.parse(svg_filename)
+        self.viewbox = self.readViewbox(doc)
+        self.paths = self.readPaths(doc)
+        doc.unlink()
     
-    if wattribute == "" or hattribute == "":
-        print("Warning: no width or height attribute found", file=sys.stderr)
-        imgw, imgh = 500, 500
-    else:
-        imgw = strToFloatForce(wattribute)
-        imgh = strToFloatForce(hattribute) 
-
-    #leitura de paths
-    paths = [] #total de caminhos
-    colors = [] #cor de cada caminho
-    for path_xml in doc.getElementsByTagName('path'):
-        path_str = path_xml.getAttribute('d')
-        paths.append(parse_path(path_str))
-        colors.append(readColor(path_xml))
-
-    #leitura de retângulos
-    for rect_xml in doc.getElementsByTagName('rect'):
-        x,  y  = rect_xml.getAttribute('x'), rect_xml.getAttribute('y')
-        w,  h  = rect_xml.getAttribute('width'), rect_xml.getAttribute('height')
-        rx, ry = rect_xml.getAttribute('rx'), rect_xml.getAttribute('ry')
-        if rx == '':
-            rx = '0'
-        if ry == '':
-            ry = '0'
-
-        x, y, w, h, rx, ry = float(x), float(y), float(w), float(h), float(rx), float(ry)
-
-        paths.append([Move(complex(x, y)), Rectangle(x, y, w, h, rx, ry)])
-        colors.append(readColor(rect_xml))
-
-    #leitura de elipses
-    for ellipse_xml in doc.getElementsByTagName('ellipse'):
-        cx, cy = ellipse_xml.getAttribute('cx'), ellipse_xml.getAttribute('cy')
-        rx, ry = ellipse_xml.getAttribute('rx'), ellipse_xml.getAttribute('ry')
-        cx, cy, rx, ry = float(cx), float(cy), float(rx), float(ry)
-
-        paths.append([Move(complex(cx+rx, cy)), Ellipse(cx, cy, rx, ry)])
-        colors.append(readColor(ellipse_xml))
+    def readViewbox(self, doc):
+        #leitura de metadata
+        metadata = doc.getElementsByTagName('svg')[0]
+        wattribute = metadata.getAttribute('width')
+        hattribute = metadata.getAttribute('height')
     
-    #leitura de círculos
-    for circle_xml in doc.getElementsByTagName('circle'):
-        cx, cy = circle_xml.getAttribute('cx'), circle_xml.getAttribute('cy')
-        r = circle_xml.getAttribute('r')
-        cx, cy, r = float(cx), float(cy), float(r)
+        if wattribute == "" or hattribute == "":
+            print("Warning: no width or height attribute found", file=sys.stderr)
+            imgw, imgh = 500, 500
+        else:
+            imgw = strToFloatForce(wattribute)
+            imgh = strToFloatForce(hattribute) 
+        
+        return (imgh, imgh)
 
-        paths.append([Move(complex(cx+r, cy)), Circle(cx, cy, r)])
-        colors.append(readColor(circle_xml))
 
-    doc.unlink()
-    return (imgw, imgh, paths, colors)
+    def readPaths(self, doc):
+        paths = [] #total de caminhos
+
+        #leitura de paths simples
+        for path_xml in doc.getElementsByTagName('path'):
+            path_str = path_xml.getAttribute('d')
+            paths.append((parse_path(path_str), readColor(path_xml)))
+
+        #leitura de retângulos
+        for rect_xml in doc.getElementsByTagName('rect'):
+            x,  y  = rect_xml.getAttribute('x'), rect_xml.getAttribute('y')
+            w,  h  = rect_xml.getAttribute('width'), rect_xml.getAttribute('height')
+            rx, ry = rect_xml.getAttribute('rx'), rect_xml.getAttribute('ry')
+            if rx == '':
+                rx = '0'
+            if ry == '':
+                ry = '0'
+
+            x, y, w, h= float(x), float(y), float(w), float(h)
+            rx, ry = float(rx), float(ry)
+
+            color = readColor(rect_xml)
+            paths.append((Move(complex(x, y)), color))
+            paths.append((Rectangle(x, y, w, h, rx, ry), color))
+
+        #leitura de elipses
+        for ellipse_xml in doc.getElementsByTagName('ellipse'):
+            cx, cy = ellipse_xml.getAttribute('cx'), ellipse_xml.getAttribute('cy')
+            rx, ry = ellipse_xml.getAttribute('rx'), ellipse_xml.getAttribute('ry')
+            cx, cy, rx, ry = float(cx), float(cy), float(rx), float(ry)
+
+            color = readColor(ellipse_xml)
+            paths.append((Move(complex(cx+rx, cy)), color))
+            paths.append((Ellipse(cx, cy, rx, ry), color))
+        
+        #leitura de círculos
+        for circle_xml in doc.getElementsByTagName('circle'):
+            cx, cy = circle_xml.getAttribute('cx'), circle_xml.getAttribute('cy')
+            r = circle_xml.getAttribute('r')
+            cx, cy, r = float(cx), float(cy), float(r)
+
+            color = readColor(circle_xml)
+            paths.append((Move(complex(cx+r, cy)), color))
+            paths.append((Ellipse(cx, cy, r), color))
+
+        return paths
