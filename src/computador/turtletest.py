@@ -6,15 +6,12 @@ import turtle as tr
 import struct
 import sys
 
-#PIC falso:
-#uma dummy class que só foi criada para reutilizar o máximo de código de draw.py
-class FakePic:
-    def __init__(self, w, h):
+class FakeCom():
+    def __init__(self):
         self.tur = tr.Turtle()
         self.data_transferred = 0
-        m = max(w, h)
-        self.tur.screen.setworldcoordinates(-m/2, -m/2, m/2, m/2)
-
+    
+    
     #sempre pronto para ler mais informação
     def read(self, **kargs):
         return b'2'
@@ -42,7 +39,15 @@ class FakePic:
         self.tur.hideturtle()
 
 
+#PIC falso:
+#uma dummy class que só foi criada para reutilizar o máximo de código de draw.py
+class FakePic(PICdraw.PIC):
+    def __init__(self):
+        self.com = FakeCom()
+        self.xnow, self.ynow = 0, 0
+        self.thnow = 0
+
 if __name__ == "__main__":
     #inicializa o PIC :)
-    PIC = FakePic(500, 500)
-    PICdraw.PICmain(PIC)
+    pic = FakePic()
+    pic.mainLoop()
