@@ -2,7 +2,8 @@
 #define __PINS_HPP__
 
 
-#define SENSOR_FRENTE 4
+#define ULTRA_TRIGGER 4
+#define ULTRA_ECHO 6
 
 #define RODA_ESQ_PIN 3
 #define RODA_DIR_PIN 5

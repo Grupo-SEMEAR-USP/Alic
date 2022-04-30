@@ -6,6 +6,7 @@
 #include "bluetooth.hpp"
 #include "movimento.hpp"
 #include "cores.hpp"
+#include "utils.hpp"
 
 
 /*globais bluetooth*/
@@ -24,6 +25,7 @@ void seguir_mao(void);
 
 
 void seguir_mao(void){
+    PRINTD("seguindo...\n");
     pid();
     ultra_read();
     controle();
@@ -37,6 +39,10 @@ void setup(){
     //inicialização sensores infravermelhos
     pinMode(INFRA_ESQ, INPUT);
     pinMode(INFRA_DIR, INPUT);
+
+    //inicialização sensor ultrassonico
+    pinMode(ULTRA_TRIGGER, OUTPUT);
+    pinMode(ULTRA_ECHO, INPUT);
 
     //inicialização dos motores de cor
     tambor.attach(TAMBOR_PIN);

@@ -2,6 +2,7 @@
 #include <Servo.h>
 
 #include "controle.hpp"
+#include "utils.hpp"
 
 
 #define KP 1
@@ -45,6 +46,10 @@ void pid(void){
     //Info para proxima vez
     last_err = error;
     last_time = now;
+
+    PRINTD("output: ");
+    PRINTD(output);
+    PRINTD("\n");
 }
 
 long readUltrasonicDistance(int triggerPin, int echoPin){
@@ -62,7 +67,10 @@ long readUltrasonicDistance(int triggerPin, int echoPin){
 void ultra_read(void){
 
     //Le as informacoes do sensor em cm
-    distance = 0.01723 * readUltrasonicDistance(SENSOR_FRENTE, SENSOR_FRENTE);
+    distance = 0.01723 * readUltrasonicDistance(ULTRA_TRIGGER, ULTRA_ECHO);
+    PRINTD("ultra: ");
+    PRINTD(distance);
+    PRINTD("\n");
 }
 
 void controle(void){
@@ -76,7 +84,13 @@ void controle(void){
     constrain(right_speed, 0, 255);
 
     int left = analogRead(INFRA_ESQ);
+    PRINTD("infra esq: ");
+    PRINTD(left);
+    PRINTD("\n");
     int right = analogRead(INFRA_DIR);
+    PRINTD("infra dir: ");
+    PRINTD(right);
+    PRINTD("\n");
 
     float curve = 0.5; //Parâmetro de redução de velocidade;
 
