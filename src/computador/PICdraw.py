@@ -10,15 +10,6 @@ import math as m
 
 from svgutils import SVG, Rectangle
 
-#cores: branco, preto, vermelho, verde, azul escuro, amarelo, roxo, azul bebê
-pic_colors = np.array([
-    [0.8, 0.8, 0.8], [0, 0, 0],
-    [1, 0, 0], [0, 1, 0], [0, 0, 1],
-    [1, 1, 0], [1, 0, 1], [0, 1, 1]
-])
-
-name_preprogs = ["casa", "estrela", "NRE"]
-name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
 
 def toDeltaPolar(coordsnow, thnow, coords):
         xnow, ynow = coordsnow
@@ -42,10 +33,11 @@ def toDeltaPolar(coordsnow, thnow, coords):
         return r, thmove
 
 class PIC():
-    def __init__(self, com):
+    def __init__(self, com, possible_colors):
         self.com = serial.Serial(com)
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
+        self.possible_colors = possible_colors
     
     def __del__(self):
         self.com.close()
@@ -98,7 +90,7 @@ class PIC():
         nprgb = np.array(rgb)
         color_error = []
         #para cada cor que o pic tem, calcula o erro (o **2 é para tirar o sinal) de cada cor e soma
-        for color in pic_colors:
+        for color in self.possible_colors:
             error = ((color - nprgb)**2).sum()
             color_error.append(error)
 
@@ -140,7 +132,7 @@ class PIC():
                     x, y = p.real, p.imag
                     self.drawLine(x, -y)
 
-    def mainLoop(self): 
+    def mainLoop(self, name_preprogs, name_colors): 
         while True:
             args = input("comando: ").split()
 
@@ -182,5 +174,13 @@ if __name__ == "__main__":
         file=sys.stderr)
         sys.exit(-1)
 
-    pic = PIC(sys.argv[1])
-    pic.mainLoop()
+    possible_colors = np.array([
+      [0.8, 0.8, 0.8], [0, 0, 0],
+      [1, 0, 0], [0, 1, 0], [0, 0, 1],
+      [1, 1, 0], [1, 0, 1], [0, 1, 1]
+    ])
+    pic = PIC(sys.argv[1], possible_colors)
+
+    name_preprogs = ["casa", "estrela", "NRE"]
+    name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
+    pic.mainLoop(name_preprogs, name_colors)

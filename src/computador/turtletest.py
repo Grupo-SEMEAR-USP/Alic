@@ -4,7 +4,7 @@
 import PICdraw
 import turtle as tr
 import struct
-import sys
+import numpy as np
 
 class FakeCom():
     def __init__(self):
@@ -42,12 +42,21 @@ class FakeCom():
 #PIC falso:
 #uma dummy class que só foi criada para reutilizar o máximo de código de draw.py
 class FakePic(PICdraw.PIC):
-    def __init__(self):
+    def __init__(self, possible_colors):
         self.com = FakeCom()
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
+        self.possible_colors = possible_colors
 
 if __name__ == "__main__":
     #inicializa o PIC :)
-    pic = FakePic()
-    pic.mainLoop()
+    possible_colors = np.array([
+      [0.8, 0.8, 0.8], [0, 0, 0],
+      [1, 0, 0], [0, 1, 0], [0, 0, 1],
+      [1, 1, 0], [1, 0, 1], [0, 1, 1]
+    ])
+    pic = FakePic(possible_colors)
+    
+    name_preprogs = ["casa", "estrela", "NRE"]
+    name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
+    pic.mainLoop(name_preprogs, name_colors)
