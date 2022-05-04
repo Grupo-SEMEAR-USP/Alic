@@ -42,21 +42,22 @@ class PIC():
     def __del__(self):
         self.com.close()
 
-    #função que manda as informações para o pic
-    #formatação da informação:
-    #um byte de metadata, contendo o comando (linha, ir para e cor)
-    #quatro bytes de informação, sendo, na cor, um para index e três de padding
-    #e, na linha e ir para um conjunto de dois unsigned shorts de
-    #coordenas multiplicados por cinquenta 
-    #(permite imagens de até +-1000x1000px com uma precisão boa e apenas 5 bytes de envio)
+    #função que manda as informações para o pic, formatação da informação:
+    #um byte de metadata, contendo o comando (linha, ir para e cor) quatro
+    #bytes de informação, sendo, na cor, um para index e três de padding e,
+    #na linha e ir para um conjunto de dois unsigned shorts de coordenas
+    #multiplicados por cinquenta (permite imagens de até +-1000x1000px
+    #com uma precisão boa e apenas 5 bytes de envio)
     def send(self, cmd, *args):
         buf = bytes()
         if cmd == "goto":
             buf += b'g'
-            buf += bytearray(struct.pack(">Hh", int(args[0]*50), int(args[1]*50))) 
+            struct_pos = struct.pack(">Hh", int(args[0]*50), int(args[1]*50))
+            buf += bytearray(struct_pos) 
         elif cmd == "line":
             buf += b'l'
-            buf += bytearray(struct.pack(">Hh", int(args[0]*50), int(args[1]*50))) 
+            struct_pos = struct.pack(">Hh", int(args[0]*50), int(args[1]*50))
+            buf += bytearray(struct_pos)
         elif cmd == "color":
             buf += b'c'
             buf += int(args[0]).to_bytes(length=1, byteorder="big")
@@ -71,12 +72,14 @@ class PIC():
         else:
             raise ValueError("O PIC não tem esse comando!")
 
-        #o primeiro comando escreve incondicionalmente, depois vê quando pode mandar o próximo
+        #o primeiro comando escreve incondicionalmente
+        #depois vê quando pode mandar o próximo
         self.com.write(buf)
         flag_byte = self.com.read(size=1)
         print(f'{cmd}: ', *args)
         if flag_byte[0] != ord('2'):
-            raise IOError(f"o byte de leitura completa não está correto: \'{flag_byte}\'")
+            raise IOError(
+              f"o byte de leitura completa não está correto: \'{flag_byte}\'")
 
     #desenha uma linha
     def drawLine(self, x, y):
@@ -89,7 +92,8 @@ class PIC():
     def getColor(self, rgb):
         nprgb = np.array(rgb)
         color_error = []
-        #para cada cor que o pic tem, calcula o erro (o **2 é para tirar o sinal) de cada cor e soma
+        #para cada cor que o pic tem, calcula o erro de cada cor e soma via
+        #MSE (min square error)
         for color in self.possible_colors:
             error = ((color - nprgb)**2).sum()
             color_error.append(error)
@@ -123,9 +127,10 @@ class PIC():
                 self.drawLine(e.start.real, -(e.start.imag+e.height))
                 self.drawLine(e.start.real, -(e.start.imag))
                 
-            #o módulo svg.path tem a útil função que pega um parâmetro t de zero a um e
-            #retorna um ponto na curva, sendo que em t=0 é o início da curva e t=1 é o final
-            #e aparentemente ele é implementado para quase todas as classes de path
+            #o módulo svg.path tem a útil função que pega um parâmetro t de 
+            #zero a um e retorna um ponto na curva, sendo que em t=0 é o início
+            #da curva e t=1 é o final e aparentemente ele é implementado para
+            #quase todas as classes de path
             else:
                 for t in range(0, detail+1):
                     p = e.point(t/detail)
@@ -164,14 +169,13 @@ class PIC():
             elif args[0] == "aleatorio":
                 self.send("random")
             else:
-                print("Não foi possível interpretar o comando", file=sys.stderr)
+                print("Não foi possível interpretar o comando", 
+                  file=sys.stderr)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(
-        f"Erro! use: {sys.argv[0]} COM_port", 
-        file=sys.stderr)
+        print(f"Erro! use: {sys.argv[0]} COM_port", file=sys.stderr)
         sys.exit(-1)
 
     possible_colors = np.array([
@@ -179,8 +183,13 @@ if __name__ == "__main__":
       [1, 0, 0], [0, 1, 0], [0, 0, 1],
       [1, 1, 0], [1, 0, 1], [0, 1, 1]
     ])
+
     pic = PIC(sys.argv[1], possible_colors)
 
     name_preprogs = ["casa", "estrela", "NRE"]
-    name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
+    name_colors   = [
+      "cinza", "preto", "vermelho", "verde",
+      "azul", "amarelo", "rosa", "anil"
+    ]
+
     pic.mainLoop(name_preprogs, name_colors)

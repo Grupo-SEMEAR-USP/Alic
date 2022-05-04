@@ -89,7 +89,8 @@ class SVG():
         hattribute = metadata.getAttribute('height')
     
         if wattribute == "" or hattribute == "":
-            print("Warning: no width or height attribute found", file=sys.stderr)
+            print("Warning: no width or height attribute found",
+              file=sys.stderr)
             imgw, imgh = 500, 500
         else:
             imgw = strToFloatForce(wattribute)
@@ -108,9 +109,12 @@ class SVG():
 
         #leitura de retângulos
         for rect_xml in doc.getElementsByTagName('rect'):
-            x,  y  = rect_xml.getAttribute('x'), rect_xml.getAttribute('y')
-            w,  h  = rect_xml.getAttribute('width'), rect_xml.getAttribute('height')
-            rx, ry = rect_xml.getAttribute('rx'), rect_xml.getAttribute('ry')
+            x =  rect_xml.getAttribute('x')
+            y  = rect_xml.getAttribute('y')
+            w  = rect_xml.getAttribute('width')
+            h  = rect_xml.getAttribute('height')
+            rx = rect_xml.getAttribute('rx')
+            ry = rect_xml.getAttribute('ry')
             if rx == '':
                 rx = '0'
             if ry == '':
@@ -125,9 +129,10 @@ class SVG():
 
         #leitura de elipses
         for ellipse_xml in doc.getElementsByTagName('ellipse'):
-            cx, cy = ellipse_xml.getAttribute('cx'), ellipse_xml.getAttribute('cy')
-            rx, ry = ellipse_xml.getAttribute('rx'), ellipse_xml.getAttribute('ry')
-            cx, cy, rx, ry = float(cx), float(cy), float(rx), float(ry)
+            cx = float(ellipse_xml.getAttribute('cx'))
+            cy = float(ellipse_xml.getAttribute('cy'))
+            rx = float(ellipse_xml.getAttribute('rx'))
+            ry = float(ellipse_xml.getAttribute('ry'))
 
             color = readColor(ellipse_xml)
             paths.append((Move(complex(cx+rx, cy)), color))
@@ -135,9 +140,9 @@ class SVG():
         
         #leitura de círculos
         for circle_xml in doc.getElementsByTagName('circle'):
-            cx, cy = circle_xml.getAttribute('cx'), circle_xml.getAttribute('cy')
-            r = circle_xml.getAttribute('r')
-            cx, cy, r = float(cx), float(cy), float(r)
+            cx = float(circle_xml.getAttribute('cx'))
+            cy = float(circle_xml.getAttribute('cy'))
+            r  = float(circle_xml.getAttribute('r'))
 
             color = readColor(circle_xml)
             paths.append((Move(complex(cx+r, cy)), color))

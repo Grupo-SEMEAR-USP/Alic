@@ -39,8 +39,8 @@ class FakeCom():
         self.tur.hideturtle()
 
 
-#PIC falso:
-#uma dummy class que só foi criada para reutilizar o máximo de código de draw.py
+#PIC falso: uma dummy class do pic
+#só foi criada para reutilizar o máximo de código de draw.py
 class FakePic(PICdraw.PIC):
     def __init__(self, possible_colors):
         self.com = FakeCom()
@@ -58,5 +58,9 @@ if __name__ == "__main__":
     pic = FakePic(possible_colors)
     
     name_preprogs = ["casa", "estrela", "NRE"]
-    name_colors   = ["cinza", "preto", "vermelho", "verde", "azul", "amarelo", "rosa", "anil"]
+    name_colors   = [
+      "cinza", "preto", "vermelho", "verde",
+      "azul", "amarelo", "rosa", "anil"
+    ]
+    
     pic.mainLoop(name_preprogs, name_colors)
