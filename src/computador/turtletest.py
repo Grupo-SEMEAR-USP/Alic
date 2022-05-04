@@ -7,10 +7,10 @@ import struct
 import numpy as np
 
 class FakeCom():
-    def __init__(self):
+    def __init__(self, possible_colors):
         self.tur = tr.Turtle()
         self.data_transferred = 0
-    
+        self.possible_colors = possible_colors
     
     #sempre pronto para ler mais informação
     def read(self, **kargs):
@@ -18,7 +18,7 @@ class FakeCom():
 
     def write(self, buf):
         if buf[0] == ord('c'):
-            self.tur.color(PICdraw.pic_colors[buf[1]-1])
+            self.tur.color(self.possible_colors[buf[1]-1])
         elif buf[0] == ord('g'):
             self.tur.up()
             r, th = struct.unpack(">Hh", buf[1:5])
@@ -43,7 +43,7 @@ class FakeCom():
 #só foi criada para reutilizar o máximo de código de draw.py
 class FakePic(PICdraw.PIC):
     def __init__(self, possible_colors):
-        self.com = FakeCom()
+        self.com = FakeCom(possible_colors)
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
         self.possible_colors = possible_colors
