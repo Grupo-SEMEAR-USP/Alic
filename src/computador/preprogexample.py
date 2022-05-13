@@ -3,7 +3,7 @@ import turtle as tr
 import sys
 import math as m
 import time
-
+#teste cabo no git hub
 def init_prepronto(x, y):
     tr.hideturtle()
     time.sleep(2)
