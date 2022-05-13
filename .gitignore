@@ -1,7 +1,7 @@
-compile_commands.json
-venv/*
-.vscode/*
-.cache/*
+venv
+.*
+!.gitignore
+
 *.eep
 *.bin
 *.hex
