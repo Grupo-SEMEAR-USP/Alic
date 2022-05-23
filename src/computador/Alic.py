@@ -174,7 +174,7 @@ class Alic():
                     #coloca a cor correta
                     self.setColor(color)
                     #e desenha o caminho!
-                    self.drawPath(path, int(args[1]))
+                    self.drawPath(path, int(args[2]))
 
             elif args[0] in name_colors:
                 self.send("color", name_colors.index(args[0])+1)

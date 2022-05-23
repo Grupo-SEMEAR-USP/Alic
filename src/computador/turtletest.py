@@ -36,7 +36,17 @@ class FakeCom():
 
     def close(self):
         print(f"\n{self.data_transferred}")
-        self.tur.hideturtle()
+        try:
+            self.tur.hideturtle()
+        except:
+            #vários erros podem acontecer aqui, por exemplo:
+            #a pessoa fechou a janela do turtle no meio de um desenho,
+            #a pessoa de um keyboard interrupt,
+            #o turtle acabou de desenhar e a pessoa fechou a janela
+            #algum tipo de IOerror no ato de desenhar
+            #no caso a gente só ignora tudo, estamos terminando o
+            #programa mesmo 
+            pass
 
 
 #Alic falso: uma dummy class do Alic
