@@ -89,7 +89,7 @@ class SVG():
         hattribute = metadata.getAttribute('height')
     
         if wattribute == "" or hattribute == "":
-            print("Warning: no width or height attribute found",
+            print("Aviso: sem atributo de tamanho, deixando como 500,500",
               file=sys.stderr)
             imgw, imgh = 500, 500
         else:

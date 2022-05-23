@@ -132,22 +132,40 @@ class Alic():
             #da curva e t=1 é o final e aparentemente ele é implementado para
             #quase todas as classes de path
             else:
-                for t in range(0, detail+1):
-                    p = e.point(t/detail)
-                    x, y = p.real, p.imag
-                    self.drawLine(x, -y)
+                try:
+                    for t in range(0, detail+1):
+                        p = e.point(t/detail)
+                        x, y = p.real, p.imag
+                        self.drawLine(x, -y)
+                except AttributeError:
+                    raise ValueError(
+                        "O path não é composto por objetos parametrizáveis!")
 
     def mainLoop(self, name_preprogs, name_colors): 
         while True:
-            args = input("comando: ").split()
+            args = None
+            try:
+                args = input("comando: ").split()
+            except KeyboardInterrupt:
+                break
+            except EOFError:
+                break
 
             if not args:
                 break
         
             #se o comando for um arquivo svg, lê e desenha ele
-            if args[0][-4:] == ".svg" and len(args) == 2:
+            if args[0] == "desenhar":
+                if len(args) != 3:
+                    print("utilize: desenhar arquivo.svg detalhe(de 1-100)",
+                      sys.stderr)
                 #le o svg
-                svg = SVG(args[0])
+                svg = None
+                try:
+                    svg = SVG(args[1])
+                except FileNotFoundError:
+                    print(f"arquivo {args[1]} não encontrado", file=sys.stderr)
+                    continue
                 w, h = svg.viewbox
                 paths = svg.paths
 

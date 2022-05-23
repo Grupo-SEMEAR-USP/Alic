@@ -35,7 +35,7 @@ class FakeCom():
         self.data_transferred += 5
 
     def close(self):
-        print(self.data_transferred)
+        print(f"\n{self.data_transferred}")
         self.tur.hideturtle()
 
 
