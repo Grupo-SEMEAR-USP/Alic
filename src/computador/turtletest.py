@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #módulos necessários: turtle e os de draw.py
 
-import PICdraw
+import Alic
 import turtle as tr
 import struct
 import numpy as np
@@ -30,7 +30,7 @@ class FakeCom():
             self.tur.left(th/50)
             self.tur.forward(r/50)
         else:
-            raise ValueError("FakePIC não tem o comando mandado!")
+            raise ValueError("FakeAlic não tem o comando mandado!")
         
         self.data_transferred += 5
 
@@ -39,9 +39,9 @@ class FakeCom():
         self.tur.hideturtle()
 
 
-#PIC falso: uma dummy class do pic
+#Alic falso: uma dummy class do Alic
 #só foi criada para reutilizar o máximo de código de draw.py
-class FakePic(PICdraw.PIC):
+class FakeAlic(Alic.Alic):
     def __init__(self, possible_colors):
         self.com = FakeCom(possible_colors)
         self.xnow, self.ynow = 0, 0
@@ -49,13 +49,13 @@ class FakePic(PICdraw.PIC):
         self.possible_colors = possible_colors
 
 if __name__ == "__main__":
-    #inicializa o PIC :)
+    #inicializa o Alic :)
     possible_colors = np.array([
       [0.8, 0.8, 0.8], [0, 0, 0],
       [1, 0, 0], [0, 1, 0], [0, 0, 1],
       [1, 1, 0], [1, 0, 1], [0, 1, 1]
     ])
-    pic = FakePic(possible_colors)
+    alic = FakeAlic(possible_colors)
     
     name_preprogs = ["casa", "estrela", "NRE"]
     name_colors   = [
@@ -63,4 +63,4 @@ if __name__ == "__main__":
       "azul", "amarelo", "rosa", "anil"
     ]
     
-    pic.mainLoop(name_preprogs, name_colors)
+    alic.mainLoop(name_preprogs, name_colors)

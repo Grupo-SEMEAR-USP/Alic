@@ -32,7 +32,7 @@ def toDeltaPolar(coordsnow, thnow, coords):
 
         return r, thmove
 
-class PIC():
+class Alic():
     def __init__(self, com, possible_colors):
         self.com = serial.Serial(com)
         self.xnow, self.ynow = 0, 0
@@ -42,7 +42,7 @@ class PIC():
     def __del__(self):
         self.com.close()
 
-    #função que manda as informações para o pic, formatação da informação:
+    #função que manda as informações para o alic, formatação da informação:
     #um byte de metadata, contendo o comando (linha, ir para e cor) quatro
     #bytes de informação, sendo, na cor, um para index e três de padding e,
     #na linha e ir para um conjunto de dois unsigned shorts de coordenas
@@ -70,7 +70,7 @@ class PIC():
             bif += b'r'
             buf += b'\0\0\0\0'
         else:
-            raise ValueError("O PIC não tem esse comando!")
+            raise ValueError("O Alic não tem esse comando!")
 
         #o primeiro comando escreve incondicionalmente
         #depois vê quando pode mandar o próximo
@@ -88,11 +88,11 @@ class PIC():
         self.xnow, self.ynow = x, y
         self.thnow += th
 
-    #pega o index da cor correta para o PIC interpretar
+    #pega o index da cor correta para o Alic interpretar
     def getColor(self, rgb):
         nprgb = np.array(rgb)
         color_error = []
-        #para cada cor que o pic tem, calcula o erro de cada cor e soma via
+        #para cada cor que o Alic tem, calcula o erro de cada cor e soma via
         #MSE (min square error)
         for color in self.possible_colors:
             error = ((color - nprgb)**2).sum()
@@ -101,10 +101,10 @@ class PIC():
         #e retorna a cor com menor erro +1 já que o zero é especial
         return color_error.index(min(color_error))+1
 
-    #coloca a cor correta para o pic
+    #coloca a cor correta para o Alic
     def setColor(self, rgbcolor):
-        piccolor = self.getColor(rgbcolor)
-        self.send("color", piccolor)
+        color = self.getColor(rgbcolor)
+        self.send("color", color)
 
     #sem desenhar no papel, vai para esse lugar
     def goTo(self, x, y):
@@ -184,7 +184,7 @@ if __name__ == "__main__":
       [1, 1, 0], [1, 0, 1], [0, 1, 1]
     ])
 
-    pic = PIC(sys.argv[1], possible_colors)
+    alic = Alic(sys.argv[1], possible_colors)
 
     name_preprogs = ["casa", "estrela", "NRE"]
     name_colors   = [
@@ -192,4 +192,4 @@ if __name__ == "__main__":
       "azul", "amarelo", "rosa", "anil"
     ]
 
-    pic.mainLoop(name_preprogs, name_colors)
+    alic.mainLoop(name_preprogs, name_colors)
