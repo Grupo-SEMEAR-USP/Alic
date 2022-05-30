@@ -48,35 +48,13 @@ class Alic():
     #na linha e ir para um conjunto de dois unsigned shorts de coordenas
     #multiplicados por cinquenta (permite imagens de até +-1000x1000px
     #com uma precisão boa e apenas 5 bytes de envio)
-    def send(self, cmd, *args):
-        buf = bytes()
-        if cmd == "goto":
-            buf += b'g'
-            struct_pos = struct.pack(">Hh", int(args[0]*50), int(args[1]*50))
-            buf += bytearray(struct_pos) 
-        elif cmd == "line":
-            buf += b'l'
-            struct_pos = struct.pack(">Hh", int(args[0]*50), int(args[1]*50))
-            buf += bytearray(struct_pos)
-        elif cmd == "color":
-            buf += b'c'
-            buf += int(args[0]).to_bytes(length=1, byteorder="big")
-            buf += b'\0\0\0'
-        elif cmd == "preprog":
-            buf += b'p'
-            buf += int(args[0]).to_bytes(length=1, byteorder="big")
-            buf += b'\0\0\0'
-        elif cmd == "random":
-            bif += b'r'
-            buf += b'\0\0\0\0'
-        else:
-            raise ValueError("O Alic não tem esse comando!")
+    def send(self, buf):
 
         #o primeiro comando escreve incondicionalmente
         #depois vê quando pode mandar o próximo
         self.com.write(buf)
         flag_byte = self.com.read(size=1)
-        print(f'{cmd}: ', *args)
+        
         if flag_byte[0] != ord('2'):
             raise IOError(
               f"o byte de leitura completa não está correto: \'{flag_byte}\'")
@@ -84,9 +62,18 @@ class Alic():
     #desenha uma linha
     def drawLine(self, x, y):
         r, th = toDeltaPolar((self.xnow, self.ynow), self.thnow, (x, y))
-        self.send("line", r, th)
+
+        print(f"line: ({self.xnow:.2f},{self.ynow:.2f})", end=" ")
+        print(f"-> ({x:.2f},{y:.2f}) = ({r:.2f},{th:.2f})")
+
         self.xnow, self.ynow = x, y
         self.thnow += th
+
+        buf = bytes()
+        buf += b'l'
+        struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
+        buf += bytearray(struct_pos) 
+        self.send(buf)
 
     #pega o index da cor correta para o Alic interpretar
     def getColor(self, rgb):
@@ -104,15 +91,46 @@ class Alic():
     #coloca a cor correta para o Alic
     def setColor(self, rgbcolor):
         color = self.getColor(rgbcolor)
-        self.send("color", color)
+        print("color: (", end="")
+        for c in rgbcolor:
+            print(f"{c:.2f}", end=", ")
+
+        print(f"\b\b) = {color}")
+
+        buf = bytes()
+        buf += b'c'
+        buf += int(color).to_bytes(length=1, byteorder="big")
+        
+        self.send(buf)
 
     #sem desenhar no papel, vai para esse lugar
     def goTo(self, x, y):
         r, th = toDeltaPolar((self.xnow, self.ynow), self.thnow, (x, y))
-        self.send("goto", r, th)
+
+        print(f"goto: ({self.xnow:.2f},{self.ynow:.2f})", end=" ")
+        print(f"-> ({x:.2f},{y:.2f}) = ({r:.2f},{th:.2f})")
+
         self.xnow, self.ynow = x, y
         self.thnow += th
 
+        buf = bytes()
+        buf += b'g'
+        struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
+        buf += bytearray(struct_pos) 
+
+        self.send(buf)
+
+    def toggleRandom(self):
+        print("random")
+        self.send(b'r\0\0\0\0')
+    
+    def drawPreprog(self, preprogindex):
+        print("preprog:", preprogindex)
+        buf = bytes()
+        buf += b'p'
+        buf += int(preprogindex).to_bytes(length=1, byteorder="big")
+        
+        self.send(buf)
 
     #desenha um caminho
     def drawPath(self, path, detail):
@@ -141,14 +159,24 @@ class Alic():
                     raise ValueError(
                         "O path não é composto por objetos parametrizáveis!")
 
+    #desenha um objeto de svg completo
+    def drawSVG(self, svg, detail):
+        w, h = svg.viewbox
+        paths = svg.paths
+
+        #desenha todos os caminhos do arquivo
+        for path, color in paths:
+            #coloca para a cor correta
+            self.setColor(color)
+            #e desenha o caminho!
+            self.drawPath(path, detail)
+
     def mainLoop(self, name_preprogs, name_colors): 
         while True:
             args = None
             try:
                 args = input("comando: ").split()
-            except KeyboardInterrupt:
-                break
-            except EOFError:
+            except (KeyboardInterrupt, EOFError):
                 break
 
             if not args:
@@ -166,29 +194,32 @@ class Alic():
                 except FileNotFoundError:
                     print(f"arquivo {args[1]} não encontrado", file=sys.stderr)
                     continue
-                w, h = svg.viewbox
-                paths = svg.paths
+                self.drawSVG(svg, int(args[2]))
 
-                #desenha todos os caminhos do arquivo
-                for path, color in paths:
-                    #coloca a cor correta
-                    self.setColor(color)
-                    #e desenha o caminho!
-                    self.drawPath(path, int(args[2]))
-
-            elif args[0] in name_colors:
-                self.send("color", name_colors.index(args[0])+1)
-            elif args[0] in name_preprogs:
-                self.send("preprog", name_preprogs.index(args[0])+1)
+            elif args[0] == "cor":
+                if len(args) < 2 or not args[1] in name_colors:
+                    print("utilize: cor nome, onde nome é um de: ")
+                    print(name_colors)
+                    continue
+                self.setColor(self.possible_colors[name_colors.index(args[1])])
+            
+            elif args[0] == "preprog":
+                if len(args) < 2 or not args[1] in name_preprogs:
+                    print("utilize: preprog desenho, onde desenho é um de: ")
+                    print(name_preprogs)
+                    continue
+                self.drawPreprog(name_preprogs.index(args[1])+1)
+            
             elif args[0] == "goto":
                 self.goTo(int(args[1]), int(args[2]))
             elif args[0] == "linha":
                 self.drawLine(int(args[1]), int(args[2]))
             elif args[0] == "aleatorio":
-                self.send("random")
+                self.toggleRandom()
             else:
-                print("Não foi possível interpretar o comando", 
-                  file=sys.stderr)
+                print("Não foi possível interpretar o comando")
+                print("utilize um de: cor, preprog, goto,", end=" ")
+                print("linha, aleatorio e desenhar")
 
 
 if __name__ == "__main__":
