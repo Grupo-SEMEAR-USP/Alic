@@ -41,7 +41,7 @@ class FakeCom():
         except:
             #vários erros podem acontecer aqui, por exemplo:
             #a pessoa fechou a janela do turtle no meio de um desenho,
-            #a pessoa de um keyboard interrupt,
+            #a pessoa fez um keyboard interrupt,
             #o turtle acabou de desenhar e a pessoa fechou a janela
             #algum tipo de IOerror no ato de desenhar
             #no caso a gente só ignora tudo, estamos terminando o
@@ -56,6 +56,7 @@ class FakeAlic(Alic.Alic):
         self.com = FakeCom(possible_colors)
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
+        self.color = 2
         self.possible_colors = possible_colors
 
 if __name__ == "__main__":

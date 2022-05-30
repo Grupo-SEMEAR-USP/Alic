@@ -37,6 +37,7 @@ class Alic():
         self.com = serial.Serial(com)
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
+        self.color = 2
         self.possible_colors = possible_colors
     
     def __del__(self):
@@ -54,7 +55,7 @@ class Alic():
         #depois vê quando pode mandar o próximo
         self.com.write(buf)
         flag_byte = self.com.read(size=1)
-        
+
         if flag_byte[0] != ord('2'):
             raise IOError(
               f"o byte de leitura completa não está correto: \'{flag_byte}\'")
@@ -91,6 +92,12 @@ class Alic():
     #coloca a cor correta para o Alic
     def setColor(self, rgbcolor):
         color = self.getColor(rgbcolor)
+
+        if self.color == color:
+            return
+        else:
+            self.color = color
+
         print("color: (", end="")
         for c in rgbcolor:
             print(f"{c:.2f}", end=", ")
