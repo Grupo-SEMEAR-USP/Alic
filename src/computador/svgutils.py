@@ -122,8 +122,10 @@ class SVG():
             rx, ry = float(rx), float(ry)
 
             color = readColor(rect_xml)
-            paths.append((Move(complex(x, y)), color))
-            paths.append((Rectangle(x, y, w, h, rx, ry), color))
+            paths.append((
+                [Move(complex(x, y)), Rectangle(x, y, w, h, rx, ry)],
+                color
+            ))
 
         #leitura de elipses
         for ellipse_xml in doc.getElementsByTagName('ellipse'):
@@ -133,8 +135,10 @@ class SVG():
             ry = float(ellipse_xml.getAttribute('ry'))
 
             color = readColor(ellipse_xml)
-            paths.append((Move(complex(cx+rx, cy)), color))
-            paths.append((Ellipse(cx, cy, rx, ry), color))
+            paths.append((
+                [Move(complex(cx+rx, cy)), Ellipse(cx, cy, rx, ry)],
+                color
+            ))
         
         #leitura de círculos
         for circle_xml in doc.getElementsByTagName('circle'):
@@ -143,7 +147,9 @@ class SVG():
             r  = float(circle_xml.getAttribute('r'))
 
             color = readColor(circle_xml)
-            paths.append((Move(complex(cx+r, cy)), color))
-            paths.append((Ellipse(cx, cy, r), color))
+            paths.append((
+                [Move(complex(cx+r, cy)), Ellipse(cx, cy, r)], 
+                color
+            ))
 
         return paths
