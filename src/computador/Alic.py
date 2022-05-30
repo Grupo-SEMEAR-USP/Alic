@@ -71,11 +71,16 @@ class Alic():
         self.xnow, self.ynow = x, y
         self.thnow += th
 
-        buf = bytes()
-        buf += b'l'
-        struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
-        buf += bytearray(struct_pos) 
-        self.send(buf)
+        try:
+            buf = bytes()
+            buf += b'l'
+            struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
+            buf += bytearray(struct_pos) 
+            self.send(buf)
+        except struct.error:
+            print(f"Erro, movimento grande demais! r={r} th={th}",
+              file=sys.stderr)
+            sys.exit(1)
 
     #pega o index da cor correta para o Alic interpretar
     def getColor(self, rgb):
@@ -121,12 +126,17 @@ class Alic():
         self.xnow, self.ynow = x, y
         self.thnow += th
 
-        buf = bytes()
-        buf += b'g'
-        struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
-        buf += bytearray(struct_pos) 
+        try:
+            buf = bytes()
+            buf += b'g'
+            struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
+            buf += bytearray(struct_pos) 
+            self.send(buf)
+        except struct.error:
+            print(f"Erro, movimento grande demais! r={r} th={th}",
+              file=sys.stderr)
+            sys.exit(1) 
 
-        self.send(buf)
 
     def toggleRandom(self):
         print("random")
@@ -201,8 +211,8 @@ class Alic():
             #se o comando for um arquivo svg, lê e desenha ele
             if args[0] == "desenhar":
                 if len(args) != 3:
-                    print("utilize: desenhar arquivo.svg detalhe(de 1-100)",
-                      sys.stderr)
+                    print("utilize: desenhar arquivo.svg detalhe(de 1-100)")
+                    continue
                 #le o svg
                 svg = None
                 try:
