@@ -33,8 +33,9 @@ def toDeltaPolar(coordsnow, thnow, coords):
         return r, thmove
 
 class Alic():
-    def __init__(self, com, possible_colors):
+    def __init__(self, com, possible_colors, viewbox):
         self.com = serial.Serial(com)
+        self.viewbox = viewbox
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
         self.color = 2
@@ -140,17 +141,22 @@ class Alic():
         self.send(buf)
 
     #desenha um caminho
-    def drawPath(self, path, detail):
+    def drawPath(self, path, detail, scale):
         for e in path: #para cada elemento no caminho (curva, linha, etc)
             if isinstance(e, Move):
-                self.goTo(e.start.real, -e.start.imag)
+                coords = e.start*scale
+                self.goTo(coords.real, coords.imag)
             elif isinstance(e, Line) or isinstance(e, Close):
-                self.drawLine(e.end.real, -e.end.imag)
+                coords = e.end*scale
+                self.drawLine(coords.real, coords.imag)
             elif isinstance(e, Rectangle):
-                self.drawLine(e.start.real+e.width, -e.start.imag)
-                self.drawLine(e.start.real+e.width, -(e.start.imag+e.height))
-                self.drawLine(e.start.real, -(e.start.imag+e.height))
-                self.drawLine(e.start.real, -(e.start.imag))
+                coords = e.start*scale
+                recth = e.height*scale
+                rectw = e.width*scale
+                self.drawLine(coords.real+e.width, coords.imag)
+                self.drawLine(coords.real+rectw, coords.imag+recth)
+                self.drawLine(coords.real, coords.imag+recth)
+                self.drawLine(coords.real, coords.imag)
                 
             #o módulo svg.path tem a útil função que pega um parâmetro t de 
             #zero a um e retorna um ponto na curva, sendo que em t=0 é o início
@@ -159,16 +165,19 @@ class Alic():
             else:
                 try:
                     for t in range(0, detail+1):
-                        p = e.point(t/detail)
+                        p = e.point(t/detail)*scale
                         x, y = p.real, p.imag
-                        self.drawLine(x, -y)
+                        self.drawLine(x, y)
                 except AttributeError:
                     raise ValueError(
                         "O path não é composto por objetos parametrizáveis!")
 
     #desenha um objeto de svg completo
     def drawSVG(self, svg, detail):
-        w, h = svg.viewbox
+        wimg, himg = svg.viewbox
+        w, h = self.viewbox
+        scale = min(w/wimg, h/himg)
+
         paths = svg.paths
 
         #desenha todos os caminhos do arquivo
@@ -176,7 +185,7 @@ class Alic():
             #coloca para a cor correta
             self.setColor(color)
             #e desenha o caminho!
-            self.drawPath(path, detail)
+            self.drawPath(path, detail, scale)
 
     def mainLoop(self, name_preprogs, name_colors): 
         while True:
@@ -240,7 +249,7 @@ if __name__ == "__main__":
       [1, 1, 0], [1, 0, 1], [0, 1, 1]
     ])
 
-    alic = Alic(sys.argv[1], possible_colors)
+    alic = Alic(sys.argv[1], possible_colors, (1000, 1000))
 
     name_preprogs = ["casa", "estrela", "NRE"]
     name_colors   = [

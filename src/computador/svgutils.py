@@ -31,16 +31,6 @@ class Circle(Ellipse):
         self.ry = r
 
 
-#porque o formato de svg é pouco padronizado, 
-#tem alguns arquivos que tem um sulfixo de mm ou px;
-#então tira isso
-def strToFloatForce(s):
-    nums = ""
-    for c in s:
-        if c.isdigit() or c == '.':
-            nums += c
-    return float(nums)
-
 #converte um hexadecimal de 6 caracteres em um conjunto de rgb de zero a um
 def rgbfromhex(s):
     try:
@@ -85,18 +75,26 @@ class SVG():
     def readViewbox(self, doc):
         #leitura de metadata
         metadata = doc.getElementsByTagName('svg')[0]
+
+        vattribute = metadata.getAttribute('viewBox')
         wattribute = metadata.getAttribute('width')
         hattribute = metadata.getAttribute('height')
     
-        if wattribute == "" or hattribute == "":
-            print("Aviso: sem atributo de tamanho, deixando como 500,500",
-              file=sys.stderr)
-            imgw, imgh = 500, 500
+        if vattribute != "":
+            try:
+                vattribute = vattribute.split()
+                viewbox = (float(vattribute[2]), float(vattribute[3]))
+            except IndexError:
+                print("Erro: viewbox mal formatada", file=sys.stderr)
+                sys.exit(1)
+        elif wattribute != "" and hattribute != "":
+            viewbox = (float(wattribute), float(hattribute)) 
         else:
-            imgw = strToFloatForce(wattribute)
-            imgh = strToFloatForce(hattribute) 
+            print("Aviso: sem atributo de tamanho, deixando como 1000, 1000",
+              file=sys.stderr)
+            viewbox = (1000, 1000)
         
-        return (imgh, imgh)
+        return viewbox
 
 
     def readPaths(self, doc):

@@ -7,7 +7,11 @@ import struct
 import numpy as np
 
 class FakeCom():
-    def __init__(self, possible_colors):
+    def __init__(self, possible_colors, viewbox):
+        screen = tr.Screen()
+        w, h = viewbox
+        screen.setup(w, h)
+        screen.setworldcoordinates(0, h, w, 0)
         self.tur = tr.Turtle()
         self.data_transferred = 0
         self.possible_colors = possible_colors
@@ -52,9 +56,10 @@ class FakeCom():
 #Alic falso: uma dummy class do Alic
 #só foi criada para reutilizar o máximo de código de draw.py
 class FakeAlic(Alic.Alic):
-    def __init__(self, possible_colors):
-        self.com = FakeCom(possible_colors)
+    def __init__(self, possible_colors, viewbox):
+        self.com = FakeCom(possible_colors, viewbox)
         self.xnow, self.ynow = 0, 0
+        self.viewbox = viewbox
         self.thnow = 0
         self.color = 2
         self.possible_colors = possible_colors
@@ -66,7 +71,7 @@ if __name__ == "__main__":
       [1, 0, 0], [0, 1, 0], [0, 0, 1],
       [1, 1, 0], [1, 0, 1], [0, 1, 1]
     ])
-    alic = FakeAlic(possible_colors)
+    alic = FakeAlic(possible_colors, (500, 500))
     
     name_preprogs = ["casa", "estrela", "NRE"]
     name_colors   = [
