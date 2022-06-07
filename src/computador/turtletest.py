@@ -25,18 +25,18 @@ class FakeCom():
             self.tur.color(self.possible_colors[buf[1]-1])
         elif buf[0] == ord('g'):
             self.tur.up()
-            r, th = struct.unpack(">Hh", buf[1:5])
-            self.tur.left(th/50)
-            self.tur.forward(r/50)
+            r, th = struct.unpack(">ff", buf[1:9])
+            self.tur.left(th)
+            self.tur.forward(r)
             self.tur.down()
         elif buf[0] == ord('l'):
-            r, th = struct.unpack(">Hh", buf[1:5])
-            self.tur.left(th/50)
-            self.tur.forward(r/50)
+            r, th = struct.unpack(">ff", buf[1:9])
+            self.tur.left(th)
+            self.tur.forward(r)
         else:
             raise ValueError("FakeAlic não tem o comando mandado!")
         
-        self.data_transferred += 5
+        self.data_transferred += 9
 
     def close(self):
         print(f"\n{self.data_transferred}")

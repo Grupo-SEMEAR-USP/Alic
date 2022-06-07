@@ -6,14 +6,13 @@
 #include "cores.hpp"
 #include "utils.hpp"
 
-#define MULT_BTLONG 50
 #define PROXIMO_COMANDO '2'
-#define BUF_LIDO_T 5
+#define BUF_LIDO_T 9
 
 
 extern SoftwareSerial bt_serial;
 
-static unsigned int buf_lido[BUF_LIDO_T]; //buffer de entrada, guarda os inputs de bluetooth
+static uint8_t buf_lido[BUF_LIDO_T]; //buffer de entrada, guarda os inputs de bluetooth
 static int b_lido = 0; //a posicao no buffer que temos que ler ainda
 
 void ler_bt(void){
@@ -35,18 +34,18 @@ void ler_bt(void){
 
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
     b_lido = 0;
-    uint16_t r;
-    int16_t th;
+    float r;
+    float th;
     switch(buf_lido[0]){
     case 'g':
-        r = (buf_lido[1] << 8) + buf_lido[2];
-        th = (buf_lido[3] << 8) + buf_lido[4];
-        ir_para_pos((float) r/MULT_BTLONG, (float) th/MULT_BTLONG);
+        r  = *((float*) buf_lido+1);
+        th = *((float*) buf_lido+5);
+        ir_para_pos(r, th);
         break;
     case 'l':
-        r = (buf_lido[1] << 8) + buf_lido[2];
-        th = (buf_lido[3] << 8) + buf_lido[4];
-        desehar_linha((float) r/MULT_BTLONG, (float) th/MULT_BTLONG);
+        r  = *((float*) buf_lido+1);
+        th = *((float*) buf_lido+2);
+        desehar_linha(r, th);
         break;
     case 'c':
         mudar_cor(buf_lido[1]);

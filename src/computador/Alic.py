@@ -71,16 +71,10 @@ class Alic():
         self.xnow, self.ynow = x, y
         self.thnow += th
 
-        try:
-            buf = bytes()
-            buf += b'l'
-            struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
-            buf += bytearray(struct_pos) 
-            self.send(buf)
-        except struct.error:
-            print(f"Erro, movimento grande demais! r={r} th={th}",
-              file=sys.stderr)
-            sys.exit(1)
+        buf = b'l'
+        struct_pos = struct.pack(">ff", r, th)
+        buf += bytearray(struct_pos) 
+        self.send(buf)
 
     #pega o index da cor correta para o Alic interpretar
     def getColor(self, rgb):
@@ -110,9 +104,9 @@ class Alic():
 
         print(f"\b\b) = {color}")
 
-        buf = bytes()
-        buf += b'c'
+        buf  = b'c'        
         buf += int(color).to_bytes(length=1, byteorder="big")
+        buf += bytes(7)
         
         self.send(buf)
 
@@ -126,27 +120,23 @@ class Alic():
         self.xnow, self.ynow = x, y
         self.thnow += th
 
-        try:
-            buf = bytes()
-            buf += b'g'
-            struct_pos = struct.pack(">Hh", int(r*50), int(th*50))
-            buf += bytearray(struct_pos) 
-            self.send(buf)
-        except struct.error:
-            print(f"Erro, movimento grande demais! r={r} th={th}",
-              file=sys.stderr)
-            sys.exit(1) 
+        buf = b'g'
+        struct_pos = struct.pack(">ff", r, th)
+        buf += bytearray(struct_pos) 
+        self.send(buf)
 
 
     def toggleRandom(self):
         print("random")
-        self.send(b'r\0\0\0\0')
+        buf  = b'r'
+        buf += bytes(8)
+        self.send(buf)
     
     def drawPreprog(self, preprogindex):
         print("preprog:", preprogindex)
-        buf = bytes()
-        buf += b'p'
+        buf  = b'r'
         buf += int(preprogindex).to_bytes(length=1, byteorder="big")
+        buf += bytes(7)
         
         self.send(buf)
 
