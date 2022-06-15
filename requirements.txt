@@ -2,3 +2,4 @@ svg.path
 numpy
 turtle
 pyserial
+structlog

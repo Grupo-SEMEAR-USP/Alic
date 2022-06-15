@@ -7,8 +7,23 @@ import serial
 import sys
 import numpy as np
 import math as m
+import structlog
+import logging
 
 from svgutils import SVG, Rectangle
+
+def configLogging(debug=False):
+    config = structlog.get_config()
+    structlog.configure(
+        processors=[
+            structlog.stdlib.add_logger_name, 
+            *config["processors"]],
+        logger_factory=structlog.stdlib.LoggerFactory()
+    )
+
+    root_logger = logging.getLogger()
+    root_logger.addHandler(logging.StreamHandler())
+    root_logger.setLevel(logging.DEBUG if debug else logging.WARNING)
 
 
 def toDeltaPolar(coordsnow, thnow, coords):
@@ -33,6 +48,7 @@ def toDeltaPolar(coordsnow, thnow, coords):
         return r, thmove
 
 class Alic():
+    log = structlog.get_logger("Alic")
     def __init__(self, com, possible_colors, viewbox):
         self.com = serial.Serial(com)
         self.viewbox = viewbox
@@ -240,8 +256,16 @@ class Alic():
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(f"Erro! use: {sys.argv[0]} COM_port", file=sys.stderr)
+        print(f"Erro! use: {sys.argv[0]} COM_port [debug]", file=sys.stderr)
         sys.exit(-1)
+
+    try:
+        print(sys.argv[2])
+        debug = int(sys.argv[2]) != 0
+    except (IndexError, ValueError):
+        debug = False
+    
+    configLogging(debug)
 
     possible_colors = np.array([
       [0.8, 0.8, 0.8], [0, 0, 0],

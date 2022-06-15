@@ -5,6 +5,7 @@ import Alic
 import turtle as tr
 import struct
 import numpy as np
+import sys
 
 class FakeCom():
     def __init__(self, possible_colors, viewbox):
@@ -65,6 +66,14 @@ class FakeAlic(Alic.Alic):
         self.possible_colors = possible_colors
 
 if __name__ == "__main__":
+
+    try:
+        debug = int(sys.argv[1]) != 0
+    except (IndexError, ValueError):
+        debug = False
+    
+    Alic.configLogging(debug)
+
     #inicializa o Alic :)
     possible_colors = np.array([
       [0.8, 0.8, 0.8], [0, 0, 0],
