@@ -36,8 +36,11 @@ void pid(void){
     double time_change = (double)(now - last_time);
 
     //Calculo dos erros
+    //Erro proporcional
     error = input - setpoint;
+    //Erro diferencial
     err_sum += (error * time_change);
+    //Erro integral
     d_err = (error - last_err) / time_change;
 
     //Computando PIP
