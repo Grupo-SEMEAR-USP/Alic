@@ -2,8 +2,8 @@
 #define __PINS_HPP__
 
 
-#define ULTRA_TRIGGER 4
-#define ULTRA_ECHO 6
+#define LIDAR1_SDA A4
+#define LIDAR1_SCL A5
 
 #define RODA_ESQ_PIN 3
 #define RODA_DIR_PIN 5
