@@ -40,6 +40,9 @@ void setup(){
     pinMode(INFRA_ESQ, INPUT);
     pinMode(INFRA_DIR, INPUT);
 
+    //inicialização do lidar
+    void setLidar1();
+
     //inicialização sensor ultrassonico
     pinMode(ULTRA_TRIGGER, OUTPUT);
     pinMode(ULTRA_ECHO, INPUT);

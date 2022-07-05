@@ -1,5 +1,5 @@
 #include <math.h>
-#include <Servo.h>
+#include "Adafruit_VL53L0X.h" //Biblioteca do Lidar
 
 #include "controle.hpp"
 #include "utils.hpp"
@@ -13,7 +13,7 @@
 extern Servo roda_esquerda;
 extern Servo roda_direita;
 
-/*Globais sensores ultrassonicos*/
+/*Globais lidar*/
 static float distance = 0;
 static long microsec = 0;
 
@@ -55,7 +55,24 @@ void pid(void){
     PRINTD("\n");
 }
 
-long readUltrasonicDistance(int triggerPin, int echoPin){
+void setLidar1(){
+    Serial.begin(115200) //Porta serial
+    //Verificar comunicação
+    while(! Serial){
+        delay(1);
+    }
+
+    if(!lox.begin()){
+        wilhe(1);
+    }
+}
+
+long readLidar(){
+    VL530X_RangingMeasurementData_t measure;
+    return measure.RangeMilliMeter;
+}
+
+/*long readUltrasonicDistance(int triggerPin, int echoPin){
 
     pinMode(triggerPin, OUTPUT);
     digitalWrite(triggerPin, LOW);
@@ -74,7 +91,7 @@ void ultra_read(void){
     PRINTD("ultra: ");
     PRINTD(distance);
     PRINTD("\n");
-}
+}*/
 
 void controle(void){
 
