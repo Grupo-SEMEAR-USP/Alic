@@ -1,9 +1,11 @@
 #ifndef __PINS_HPP__
 #define __PINS_HPP__
 
+#define L1_ADDRESS 0x30
+#define L2_ADDRESS 0x31
 
-#define LIDAR1_SDA A4
-#define LIDAR1_SCL A5
+#define SHT_L1 7
+#define SHT_L2 6
 
 #define RODA_ESQ_PIN 3
 #define RODA_DIR_PIN 5

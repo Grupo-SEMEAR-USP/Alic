@@ -8,5 +8,6 @@ void pid(void);
 void ultra_read(void);
 void controle(void);
 void movimento_aleatorio(void);
+void setIDLidar(void);
 
 #endif
