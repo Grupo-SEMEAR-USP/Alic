@@ -6,16 +6,13 @@ BOARD ?= arduino.avr.uno
 CPU   ?= atmega328p
 
 
-BUILDD      ?= ./inobuild
-INO_BUILDD  ?= $(BUILDD)/build
-
-SRC          = ./src
-ARDUINO_SRC  = $(SRC)/arduino
+BUILDD      ?= ./src/arduino/inobuild
+ARDUINO_SRC  = ./src/arduino
 INO_FILES    = $(wildcard $(ARDUINO_SRC)/*.ino)
+HPP_FILES    = $(wildcard $(ARDUINO_SRC)/*.hpp)
 
 
-OUT_FILE ?= arduino.ino.with_bootloader.hex
-HEX_FILE ?= $(INO_BUILDD)/$(BOARD)/$(OUT_FILE)
+HEX_FILE ?= $(BUILDD)/$(BOARD)/arduino.ino.with_bootloader.hex
 
 
 .PHONY: all clean ino debug flash
@@ -31,12 +28,9 @@ ino: $(HEX_FILE)
 debug: $(HEX_FILE)
 
 flash:
-	cd $(INO_BUILDD)/$(BOARD)/ && avrdude -p $(CPU) -c arduino -U flash:w:$(OUT_FILE):i -F -P $(COM)
+	arduino-cli upload --fqbn $(FQBN) -p $(COM) -t $(ARDUINO_SRC)
 
 
-$(HEX_FILE): $(INO_FILES)
+$(HEX_FILE): $(INO_FILES) $(HPPFILES)
 	arduino-cli compile --fqbn $(FQBN) $(ARDUINO_SRC) --build-property "build.extra_flags=$(EXTRA_FLAGS)" --export-binaries
-	@mkdir $(BUILDD) 2>/dev/null | true
-	@rm -rf $(BUILDD)/build
-	@mv -fu $(ARDUINO_SRC)/build $(BUILDD)
 
