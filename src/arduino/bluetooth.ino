@@ -21,7 +21,7 @@ void ler_bt(void){
     if(!bt_serial.available())
         return;
     
-    PRINTD("lendo bt\n");
+    PRINTLND("lendo bt");
 
     //caso tenha informação na serial, lê ela
     buf_lido[b_lido++] = bt_serial.read();
@@ -30,7 +30,7 @@ void ler_bt(void){
     
     PRINTD("cmd: ");
     PRINTD((char) buf_lido[0]);
-    PRINTD('\n');
+    PRINTLND();
 
     //caso a gente tenha lido um conjunto inteiro de inputs tem como processar eles!
     b_lido = 0;

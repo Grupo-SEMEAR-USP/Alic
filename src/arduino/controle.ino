@@ -57,8 +57,7 @@ void pid(void)
     last_time = now;
 
     PRINTD("output: ");
-    PRINTD(output);
-    PRINTD("\n");
+    PRINTLND(output);
 }
 
 void setIDLidar()
@@ -107,12 +106,10 @@ void controle(void)
 
     int left = analogRead(INFRA_ESQ);
     PRINTD("infra esq: ");
-    PRINTD(left);
-    PRINTD("\n");
+    PRINTLND(left);
     int right = analogRead(INFRA_DIR);
     PRINTD("infra dir: ");
-    PRINTD(right);
-    PRINTD("\n");
+    PRINTLND(right);
 
     float curve = 0.5; // Parâmetro de redução de velocidade;
 

@@ -19,7 +19,7 @@ static int sentido = TAMBOR_PARAR;
 void mudar_cor(int nova_cor){
     PRINTD("cor: ");
     PRINTD(nova_cor);
-    PRINTD("\n");
+    PRINTLND();
 
     switch(nova_cor){
 

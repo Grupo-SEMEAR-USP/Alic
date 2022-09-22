@@ -296,29 +296,29 @@ void desenhar_nre(void){
 void desenhar_prepronto(int cmd){
     switch(cmd){
     case 1:
-        PRINTD("casa\n");
+        PRINTLND("casa");
         desenhar_casa();
         break;
     case 2:
-        PRINTD("estrela\n");
+        PRINTLND("estrela");
         desenhar_estrela();
         break;
     case 3:
-        PRINTD("NRE\n");
+        PRINTLND("NRE\n");
         desenhar_nre();
         break;
     default:
-        Serial.println("CMD ERRADO!\n");
+        Serial.println("CMD ERRADO!");
         break;
     }
 }
 
-void desehar_linha(float multL, float ang){
-    PRINTD("line: ");
+void desenhar_linha(float multL, float ang){
+    PRINTD("linha: ");
     PRINTD(multL);
     PRINTD(" ");
     PRINTD(ang);
-    PRINTD("\n");
+    PRINTLND();
 
 
     float mult_ang=ang/30;
@@ -343,7 +343,7 @@ void ir_para_pos(float multL, float ang){
     PRINTD(multL);
     PRINTD(" ");
     PRINTD(ang);
-    PRINTD("\n");
+    PRINTLND();
 
 
     float mult_ang=ang/30;
