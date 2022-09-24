@@ -88,7 +88,7 @@ class Alic():
         self.thnow += th
 
         buf = b'l'
-        struct_pos = struct.pack(">ff", r, th)
+        struct_pos = struct.pack("<ff", r, th)
         buf += bytearray(struct_pos) 
         self.send(buf)
 
@@ -121,7 +121,7 @@ class Alic():
         print(f"\b\b) = {color}")
 
         buf  = b'c'        
-        buf += int(color).to_bytes(length=1, byteorder="big")
+        buf += int(color).to_bytes(length=1, byteorder="little")
         buf += bytes(7)
         
         self.send(buf)
@@ -137,7 +137,7 @@ class Alic():
         self.thnow += th
 
         buf = b'g'
-        struct_pos = struct.pack(">ff", r, th)
+        struct_pos = struct.pack("<ff", r, th)
         buf += bytearray(struct_pos) 
         self.send(buf)
 
@@ -150,8 +150,8 @@ class Alic():
     
     def drawPreprog(self, preprogindex):
         print("preprog:", preprogindex)
-        buf  = b'r'
-        buf += int(preprogindex).to_bytes(length=1, byteorder="big")
+        buf  = b'p'
+        buf += int(preprogindex).to_bytes(length=1, byteorder="little")
         buf += bytes(7)
         
         self.send(buf)

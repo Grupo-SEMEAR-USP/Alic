@@ -13,6 +13,8 @@
 #define TAMBOR_PIN 9
 #define MEC_PIN 10
 
+
+#define BT_STATE 8
 #define BT_RX 12
 #define BT_TX 13
 
