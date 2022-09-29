@@ -5,12 +5,14 @@ from svg.path.path import Move, Line, Close
 import struct
 import serial
 import sys
+import os
 import numpy as np
 import math as m
 import structlog
 import logging
 
 from svgutils import SVG, Rectangle
+
 
 def configLogging(debug=False):
     config = structlog.get_config()
@@ -47,10 +49,18 @@ def toDeltaPolar(coordsnow, thnow, coords):
 
         return r, thmove
 
+
 class Alic():
-    log = structlog.get_logger("Alic")
     def __init__(self, com, possible_colors, viewbox):
-        self.com = serial.Serial(com)
+        self.log = structlog.get_logger("Alic")
+        self.log.info("inicializando Alic", com=com)
+
+        try:
+            self.com = serial.Serial(com)
+        except serial.SerialException:
+            self.log.critical("serial não pode ser aberta", com=com)
+            os._exit(-1)
+        
         self.viewbox = viewbox
         self.xnow, self.ynow = 0, 0
         self.thnow = 0
@@ -70,19 +80,30 @@ class Alic():
 
         #o primeiro comando escreve incondicionalmente
         #depois vê quando pode mandar o próximo
+        self.log.debug("enviando para a com", buffer=buf)
         self.com.write(buf)
+
         flag_byte = self.com.read(size=1)
+        self.log.debug("recebendo byte de retorno", byte=flag_byte)
 
         if flag_byte[0] != ord('2'):
-            raise IOError(
-              f"o byte de leitura completa não está correto: \'{flag_byte}\'")
+            self.log.critical(
+                "o byte de leitura completa não está correto",
+                byte=flag_byte
+            )
+            sys.exit(-1)
 
     #desenha uma linha
     def drawLine(self, x, y):
         r, th = toDeltaPolar((self.xnow, self.ynow), self.thnow, (x, y))
 
-        print(f"line: ({self.xnow:.2f},{self.ynow:.2f})", end=" ")
-        print(f"-> ({x:.2f},{y:.2f}) = ({r:.2f},{th:.2f})")
+        self.log.info(
+            "linha", 
+            x=int(self.xnow), 
+            y=int(self.ynow), 
+            x_next=int(x), 
+            y_next=int(y)
+        )
 
         self.xnow, self.ynow = x, y
         self.thnow += th
@@ -114,11 +135,7 @@ class Alic():
         else:
             self.color = color
 
-        print("color: (", end="")
-        for c in rgbcolor:
-            print(f"{c:.2f}", end=", ")
-
-        print(f"\b\b) = {color}")
+        self.log.info("cor", rgb=rgbcolor, index=color)
 
         buf  = b'c'        
         buf += int(color).to_bytes(length=1, byteorder="little")
@@ -130,8 +147,14 @@ class Alic():
     def goTo(self, x, y):
         r, th = toDeltaPolar((self.xnow, self.ynow), self.thnow, (x, y))
 
-        print(f"goto: ({self.xnow:.2f},{self.ynow:.2f})", end=" ")
-        print(f"-> ({x:.2f},{y:.2f}) = ({r:.2f},{th:.2f})")
+        self.log.info(
+            "goto", 
+            x=int(self.xnow), 
+            y=int(self.ynow), 
+            x_next=int(x), 
+            y_next=int(y)
+        )
+
 
         self.xnow, self.ynow = x, y
         self.thnow += th
@@ -143,13 +166,15 @@ class Alic():
 
 
     def toggleRandom(self):
-        print("random")
+        self.log.info("random")
+
         buf  = b'r'
         buf += bytes(8)
         self.send(buf)
     
     def drawPreprog(self, preprogindex):
-        print("preprog:", preprogindex)
+        self.log.info("desenho preprogramado", index=preprogindex)
+
         buf  = b'p'
         buf += int(preprogindex).to_bytes(length=1, byteorder="little")
         buf += bytes(7)
@@ -158,6 +183,8 @@ class Alic():
 
     #desenha um caminho
     def drawPath(self, path, detail, scale):
+        self.log.info("iniciando desenho completo")
+
         for e in path: #para cada elemento no caminho (curva, linha, etc)
             if isinstance(e, Move):
                 coords = e.start*scale
@@ -185,8 +212,10 @@ class Alic():
                         x, y = p.real, p.imag
                         self.drawLine(x, y)
                 except AttributeError:
-                    raise ValueError(
-                        "O path não é composto por objetos parametrizáveis!")
+                    self.log.critical(
+                        "O path não é composto por objetos parametrizáveis!"
+                    )
+                    exit(-1)
 
     #desenha um objeto de svg completo
     def drawSVG(self, svg, detail):
@@ -261,7 +290,7 @@ if __name__ == "__main__":
 
     try:
         print(sys.argv[2])
-        debug = int(sys.argv[2]) != 0
+        debug = int(sys.argv[2]) != None
     except (IndexError, ValueError):
         debug = False
     

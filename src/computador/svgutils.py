@@ -2,6 +2,10 @@ from svg.path import parse_path, Move
 from xml.dom import minidom
 import math as m
 import sys
+import structlog
+
+logger = structlog.get_logger("SVG")
+
 
 class Rectangle():
     def __init__(self, x, y, w, h, rx, ry):
@@ -38,6 +42,10 @@ def rgbfromhex(s):
         g = int(s[2:4], 16)/255
         b = int(s[4:6], 16)/255
     except ValueError: #ignora se a cor for "green" e não 00ff00
+        logger.error(
+            "cor não foi encontrada, levando default para (0,0,0)",
+            hex=s
+        )
         r, g, b = 0, 0, 0
     return (r, g, b)
 
@@ -55,13 +63,19 @@ def readColor(e_xml):
     elif style_stroke_i != -1:
         style_stroke_i += len("stroke:#")
         rgb = rgbfromhex(style[style_stroke_i:style_stroke_i+6])
-    elif fill != "":
-        rgb = rgbfromhex(fill[1:])
-    elif style_fill_i != -1:
-        style_fill_i += len("fill:#")
-        rgb = rgbfromhex(style[style_fill_i:style_fill_i+6])
     else:
-        rgb = (0, 0, 0)
+        logger.warning("fallback para fill")
+        if fill != "":
+            rgb = rgbfromhex(fill[1:])
+        elif style_fill_i != -1:
+            style_fill_i += len("fill:#")
+            rgb = rgbfromhex(style[style_fill_i:style_fill_i+6])
+        else:
+            logger.error(
+                "atributos de cor não encontrados,"
+                " levando default para (0,0,0)"
+            )
+            rgb = (0, 0, 0)
 
     return rgb
 
@@ -85,13 +99,12 @@ class SVG():
                 vattribute = vattribute.split()
                 viewbox = (float(vattribute[2]), float(vattribute[3]))
             except IndexError:
-                print("Erro: viewbox mal formatada", file=sys.stderr)
+                logger.critical("viewbox mal formatada", viewbox=vattribute)
                 sys.exit(1)
         elif wattribute != "" and hattribute != "":
             viewbox = (float(wattribute), float(hattribute)) 
         else:
-            print("Aviso: sem atributo de tamanho, deixando como 1000, 1000",
-              file=sys.stderr)
+            logger.error("sem atributo de tamanho, deixando como (1000, 1000)")
             viewbox = (1000, 1000)
         
         return viewbox

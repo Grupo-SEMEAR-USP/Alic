@@ -7,6 +7,9 @@ import struct
 import numpy as np
 import sys
 
+import structlog
+
+
 class FakeCom():
     def __init__(self, possible_colors, viewbox):
         screen = tr.Screen()
@@ -26,12 +29,12 @@ class FakeCom():
             self.tur.color(self.possible_colors[buf[1]-1])
         elif buf[0] == ord('g'):
             self.tur.up()
-            r, th = struct.unpack(">ff", buf[1:9])
+            r, th = struct.unpack("<ff", buf[1:9])
             self.tur.left(th)
             self.tur.forward(r)
             self.tur.down()
         elif buf[0] == ord('l'):
-            r, th = struct.unpack(">ff", buf[1:9])
+            r, th = struct.unpack("<ff", buf[1:9])
             self.tur.left(th)
             self.tur.forward(r)
         else:
@@ -59,6 +62,7 @@ class FakeCom():
 class FakeAlic(Alic.Alic):
     def __init__(self, possible_colors, viewbox):
         self.com = FakeCom(possible_colors, viewbox)
+        self.log = structlog.get_logger("Fake Alic")
         self.xnow, self.ynow = 0, 0
         self.viewbox = viewbox
         self.thnow = 0
@@ -68,7 +72,7 @@ class FakeAlic(Alic.Alic):
 if __name__ == "__main__":
 
     try:
-        debug = int(sys.argv[1]) != 0
+        debug = int(sys.argv[1]) != None
     except (IndexError, ValueError):
         debug = False
     
