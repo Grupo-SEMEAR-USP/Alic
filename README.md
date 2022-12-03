@@ -12,6 +12,3 @@ Para rodar o projeto, utilizar `python3 ./src/computador/Alic.py COM<N>` em wind
 
 Para o teste utilizando turtle, utilizar `python3 ./src/computador/turtletest.py`
 
-# Links úteis
-Documentação e mais detalhes sobre o projeto (além de detalhamentos de setup) podem ser encontrados no [Drive do SEMEAR](https://drive.google.com/drive/folders/1vWqnM74xSp67X4y8V2mQ4u67FO98yd9W?usp=sharing)
-
